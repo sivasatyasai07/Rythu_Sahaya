@@ -174,28 +174,19 @@ export const FarmerForecastTab: React.FC<Props> = ({ language }) => {
             <CheckCircle2 size={20} color="#16a34a" />
           </div>
           <div className="min-w-0" style={{ flex: 1 }}>
-            <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: 0, lineHeight: 1.25 }} className="break-words">
-              {language === 'te'
-                ? 'ఆంధ్రప్రదేశ్ APMC మండి ధరల అంచనా'
-                : (language === 'hi'
-                    ? 'आंध्र प्रदेश एपीएमसी मंडी मूल्य पूर्वानुमान'
-                    : (language === 'ta'
-                        ? 'ஆந்திரப் பிரதேச APMC மண்டி விலை கணிப்பு'
-                        : (language === 'ml'
-                            ? 'ആന്ധ്രാപ്രദേശ് APMC വിപണി വില പ്രവചനം'
-                            : 'Andhra Pradesh APMC Mandi Price Forecast')))}
+            <h2 style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0f172a', margin: 0, lineHeight: 1.25 }} className="break-words">
+              {language === 'te' ? (
+                <>ఆంధ్రప్రదేశ్<br />APMC మండి ధరల అంచనా</>
+              ) : language === 'hi' ? (
+                <>आंध्र प्रदेश<br />एपीएमसी मंडी भाव पूर्वानुमान</>
+              ) : language === 'ta' ? (
+                <>ஆந்திரப் பிரதேசம்<br />APMC மண்டி விலை கணிப்பு</>
+              ) : language === 'ml' ? (
+                <>ആന്ധ്രാപ്രദേശ്<br />APMC വിപണി വില പ്രവചനം</>
+              ) : (
+                <>Andhra Pradesh<br />APMC Mandi Price Forecast</>
+              )}
             </h2>
-            <p style={{ fontSize: '0.78rem', color: '#64748b', margin: '0.15rem 0 0 0' }} className="break-words">
-              {language === 'te'
-                ? 'తాజా అధికారిక మార్కెట్ ధరలు మరియు AI ఆధారిత 3 రోజుల అంచనా'
-                : (language === 'hi'
-                    ? 'नवीनतम आधिकारिक मंडी दरें एवं एआई आधारित 3-दिवसीय पूर्वानुमान'
-                    : (language === 'ta'
-                        ? 'சமீபத்திய அதிகாரப்பூர்வ மண்டி விலைகள் மற்றும் AI அடிப்படையிலான 3 நாள் கணிப்பு'
-                        : (language === 'ml'
-                            ? 'ഔദ്യോഗിക വിപണി വിലകളും AI അടിസ്ഥാനമാക്കിയുള്ള 3 ദിവസത്തെ പ്രവചനവും'
-                            : 'Official observed values & machine-learning price predictions for verified APMCs')))}
-            </p>
           </div>
         </div>
 

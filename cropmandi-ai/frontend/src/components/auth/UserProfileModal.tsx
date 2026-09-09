@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../../context/AuthContext';
 import { X, User, Mail, Phone, MapPin, Globe, CheckCircle2, AlertCircle, Save } from 'lucide-react';
 
@@ -28,7 +29,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
       setDistrict(profile.district || '');
       setPreferredLang(profile.preferred_language || 'en');
     } else if (user) {
-      setFullName(user.profile?.full_name || user.email.split('@')[0]);
+      setFullName(user.profile?.full_name || (user.email ? user.email.split('@')[0] : (user.phone || 'Farmer')));
     }
   }, [profile, user, isOpen]);
 
@@ -69,21 +70,19 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
     }
   };
 
-  return (
+  return createPortal(
     <div
       style={{
         position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        inset: 0,
         backgroundColor: 'rgba(15, 23, 42, 0.65)',
         backdropFilter: 'blur(4px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 1000,
+        zIndex: 2000,
         padding: '1rem',
+        boxSizing: 'border-box',
       }}
       onClick={onClose}
     >
@@ -194,16 +193,25 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
         )}
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {/* Email (Read Only) */}
+          {/* Identity (Read Only) */}
           <div>
             <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: 'var(--primary-dark)', marginBottom: '0.35rem' }}>
-              <Mail size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '0.3rem' }} />
-              Registered Email (Account Identity)
+              {user.email ? (
+                <>
+                  <Mail size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '0.3rem' }} />
+                  Registered Email (Account Identity)
+                </>
+              ) : (
+                <>
+                  <Phone size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '0.3rem' }} />
+                  Registered Phone (Account Identity)
+                </>
+              )}
             </label>
             <input
-              type="email"
+              type="text"
               className="form-input"
-              value={user.email}
+              value={user.email || user.phone || ''}
               disabled
               style={{ width: '100%', backgroundColor: '#f1f5f9', color: '#64748b', cursor: 'not-allowed' }}
             />
@@ -324,6 +332,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

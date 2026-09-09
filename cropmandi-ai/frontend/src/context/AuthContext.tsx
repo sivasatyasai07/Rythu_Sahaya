@@ -12,6 +12,9 @@ interface AuthContextType {
   isLoading: boolean;
   login: (data: LoginRequest) => Promise<void>;
   signup: (data: SignupRequest) => Promise<AuthResponse>;
+  sendPhoneOtp: (phone: string) => Promise<{ message: string }>;
+  verifyPhoneOtp: (phone: string, token: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
@@ -109,6 +112,31 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const sendPhoneOtp = async (phone: string) => {
+    setIsLoading(true);
+    try {
+      return await authService.sendPhoneOtp(phone);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const verifyPhoneOtp = async (phone: string, token: string) => {
+    setIsLoading(true);
+    try {
+      const res = await authService.verifyPhoneOtp(phone, token);
+      setUser(res.user);
+      setProfile(res.user.profile || null);
+      setToken(res.access_token);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    await authService.signInWithGoogle();
+  };
+
   const logout = async () => {
     setIsLoading(true);
     try {
@@ -148,6 +176,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isLoading,
         login,
         signup,
+        sendPhoneOtp,
+        verifyPhoneOtp,
+        signInWithGoogle,
         logout,
         refreshUser,
         updateProfile,

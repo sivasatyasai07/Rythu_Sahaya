@@ -85,8 +85,10 @@ export const AuthHeaderButton: React.FC = () => {
     );
   }
 
-  const displayName = profile?.full_name || user.profile?.full_name || user.email.split('@')[0];
-  const displayEmail = user.email.length > 22 ? `${user.email.slice(0, 19)}...` : user.email;
+  const displayName = profile?.full_name || user.profile?.full_name || (user.email ? user.email.split('@')[0] : (user.phone || 'Farmer'));
+  const displayIdentifier = user.email 
+    ? (user.email.length > 22 ? `${user.email.slice(0, 19)}...` : user.email)
+    : (user.phone || 'Mobile User');
 
   return (
     <div style={{ position: 'relative' }} ref={menuRef}>
@@ -173,7 +175,7 @@ export const AuthHeaderButton: React.FC = () => {
               {displayName}
             </p>
             <p style={{ margin: '0.15rem 0 0 0', fontSize: '0.75rem', color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {displayEmail}
+              {displayIdentifier}
             </p>
             {profile?.preferred_language && (
               <span

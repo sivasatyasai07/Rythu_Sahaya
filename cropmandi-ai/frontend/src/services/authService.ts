@@ -21,16 +21,25 @@ export const authService = {
    */
   mapSupabaseUser(sbUser: any, profile?: UserProfile | null): User {
     const role = (sbUser.user_metadata?.role as 'farmer' | 'admin') || (profile?.email?.includes('admin') ? 'admin' : 'farmer');
+    const userEmail = sbUser.email || profile?.email || '';
+    const userPhone = sbUser.phone || profile?.phone || '';
+    const displayName =
+      sbUser.user_metadata?.full_name ||
+      profile?.full_name ||
+      (userEmail ? userEmail.split('@')[0] : (userPhone ? `Farmer (${userPhone})` : 'Farmer'));
+
     return {
       id: sbUser.id,
-      email: sbUser.email || '',
+      email: userEmail,
+      phone: userPhone,
       role: role,
       is_active: true,
       created_at: sbUser.created_at,
       profile: profile || {
         id: sbUser.id,
-        email: sbUser.email || '',
-        full_name: sbUser.user_metadata?.full_name || sbUser.email?.split('@')[0] || 'Farmer',
+        email: userEmail,
+        phone: userPhone,
+        full_name: displayName,
         preferred_language: sbUser.user_metadata?.preferred_language || 'en',
       },
     };
@@ -81,7 +90,7 @@ export const authService = {
   },
 
   /**
-   * Supabase Auth Sign Up
+   * Supabase Auth Sign Up (Email/Password)
    */
   async signup(data: SignupRequest): Promise<AuthResponse> {
     const { data: authData, error } = await supabase.auth.signUp({
@@ -121,7 +130,7 @@ export const authService = {
   },
 
   /**
-   * Supabase Auth Log In
+   * Supabase Auth Log In (Email/Password)
    */
   async login(data: LoginRequest): Promise<AuthResponse> {
     const { data: authData, error } = await supabase.auth.signInWithPassword({
@@ -149,6 +158,76 @@ export const authService = {
       access_token: token,
       token_type: 'bearer',
     };
+  },
+
+  /**
+   * Send SMS OTP to Phone Number via Supabase Auth
+   */
+  async sendPhoneOtp(phone: string): Promise<{ message: string }> {
+    const cleanPhone = phone.trim();
+    const { error } = await supabase.auth.signInWithOtp({
+      phone: cleanPhone,
+      options: {
+        channel: 'sms',
+      },
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return { message: 'OTP verification code sent to your mobile number.' };
+  },
+
+  /**
+   * Verify SMS OTP Token via Supabase Auth
+   */
+  async verifyPhoneOtp(phone: string, token: string): Promise<AuthResponse> {
+    const cleanPhone = phone.trim();
+    const cleanToken = token.trim();
+
+    const { data, error } = await supabase.auth.verifyOtp({
+      phone: cleanPhone,
+      token: cleanToken,
+      type: 'sms',
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    if (!data.user || !data.session) {
+      throw new Error('Phone verification failed: No active session created.');
+    }
+
+    const accessToken = data.session.access_token;
+    this.setToken(accessToken);
+
+    const profile = await this.getProfile(data.user.id);
+    const user = this.mapSupabaseUser(data.user, profile);
+
+    return {
+      message: 'Phone verified successfully.',
+      user,
+      access_token: accessToken,
+      token_type: 'bearer',
+    };
+  },
+
+  /**
+   * Sign In with Google OAuth via Supabase
+   */
+  async signInWithGoogle(): Promise<void> {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin,
+      },
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
   },
 
   /**

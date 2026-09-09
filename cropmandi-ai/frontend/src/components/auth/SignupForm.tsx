@@ -2,14 +2,15 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { PasswordInput } from './PasswordInput';
 import { PasswordRequirements } from './PasswordRequirements';
-import { UserPlus, AlertCircle, CheckCircle2, Mail, RefreshCw, LogIn } from 'lucide-react';
+import { UserPlus, AlertCircle, CheckCircle2, Mail, RefreshCw, LogIn, Phone } from 'lucide-react';
 
 interface SignupFormProps {
   onSuccess?: () => void;
   onSwitchToLogin?: () => void;
+  onSwitchToPhoneOtp?: () => void;
 }
 
-export const SignupForm: React.FC<SignupFormProps> = ({ onSuccess, onSwitchToLogin }) => {
+export const SignupForm: React.FC<SignupFormProps> = ({ onSuccess, onSwitchToLogin, onSwitchToPhoneOtp }) => {
   const { signup, resendVerificationEmail } = useAuth();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -454,6 +455,30 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSuccess, onSwitchToLog
           </>
         )}
       </button>
+
+      {/* Switch to Phone OTP */}
+      {onSwitchToPhoneOtp && (
+        <div style={{ textAlign: 'center', marginTop: '0.85rem' }}>
+          <button
+            type="button"
+            onClick={onSwitchToPhoneOtp}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#059669',
+              fontSize: '0.82rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+            }}
+          >
+            <Phone size={14} />
+            <span>Prefer SMS OTP? Login with Mobile Number</span>
+          </button>
+        </div>
+      )}
 
       {/* Switch to Login */}
       {onSwitchToLogin && (

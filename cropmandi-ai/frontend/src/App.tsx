@@ -57,7 +57,7 @@ export function App() {
         </div>
 
         {/* Main Container */}
-        <main style={{ flex: 1, maxWidth: '1280px', width: '100%', margin: '0 auto', padding: '1.5rem 1rem', position: 'relative', zIndex: 1 }}>
+        <main style={{ flex: 1, maxWidth: '1280px', width: '100%', margin: '0 auto', padding: '1.5rem 1rem', position: 'relative' }}>
           <div style={{ display: activeTab === 'forecast' ? 'block' : 'none', width: '100%' }}>
             <FarmerForecastTab language={language} onNavigateTab={setActiveTab} />
           </div>

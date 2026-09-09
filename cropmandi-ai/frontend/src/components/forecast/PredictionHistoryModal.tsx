@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { predictionHistoryService, type PredictionHistoryRecord } from '../../services/predictionHistoryService';
 import { X, TrendingUp, TrendingDown, Minus, Trash2, Calendar, MapPin, Sparkles, RefreshCw, AlertCircle } from 'lucide-react';
 
@@ -118,21 +119,19 @@ export const PredictionHistoryModal: React.FC<PredictionHistoryModalProps> = ({ 
     );
   };
 
-  return (
+  return createPortal(
     <div
       style={{
         position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        inset: 0,
         backgroundColor: 'rgba(15, 23, 42, 0.65)',
         backdropFilter: 'blur(4px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 1000,
+        zIndex: 2000,
         padding: '1rem',
+        boxSizing: 'border-box',
       }}
       onClick={onClose}
     >
@@ -422,6 +421,7 @@ export const PredictionHistoryModal: React.FC<PredictionHistoryModalProps> = ({ 
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

@@ -1,6 +1,6 @@
 export interface UserProfile {
   id: string;
-  email: string;
+  email?: string | null;
   full_name?: string | null;
   phone?: string | null;
   preferred_language?: string;
@@ -12,7 +12,8 @@ export interface UserProfile {
 
 export interface User {
   id: string;
-  email: string;
+  email?: string;
+  phone?: string;
   role: 'farmer' | 'admin';
   is_active: boolean;
   profile?: UserProfile | null;
@@ -29,6 +30,11 @@ export interface SignupRequest {
 export interface LoginRequest {
   email: string;
   password: string;
+}
+
+export interface VerifyPhoneOtpRequest {
+  phone: string;
+  token: string;
 }
 
 export interface AuthResponse {
