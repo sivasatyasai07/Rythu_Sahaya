@@ -303,7 +303,7 @@ export const translations: Record<Language, TranslationDictionary> = {
       threeDayForecast: "3-Day Price Forecast",
       officialApiValue: "Official API Value",
       officialDatabaseValue: "Official Database Record",
-      officialCsvValue: "Official Master CSV Value",
+      officialCsvValue: "Official Recorded Value",
       predictedModelValue: "Predicted Model Value",
       fallbackValue: "Fallback Baseline Value",
       priceUnavailable: "Price Unavailable",
@@ -325,7 +325,7 @@ export const translations: Record<Language, TranslationDictionary> = {
       staleDataWarning: "Official data is older than 2 days. data.gov.in has not published newer records.",
       dataVerification: "Data Verification & Trace",
       apiChecked: "Official API Checked",
-      csvChecked: "Master CSV Checked",
+      csvChecked: "Official Mandi Archive Checked",
       predictionGenerated: "Prediction Generated",
       source: "Price Source",
       modelVersion: "Model Version",
@@ -341,11 +341,11 @@ export const translations: Record<Language, TranslationDictionary> = {
       currentPriceCardSubtitle: "Genuine recorded official observation from APMC Mandi",
       historyPriceCardTitle: "Historical Official Price",
       historyPriceCardSubtitle: "Recorded official observation for the selected date",
-      loadingSubtitle: "Executing strict 5-level precedence: Official API (data.gov.in) → master-data.csv → Database → CatBoost ML Prediction → Fallback → Unavailable.",
+      loadingSubtitle: "Executing strict 5-level precedence: Official API (data.gov.in) → Official Mandi Archive → Database → CatBoost ML Prediction → Fallback → Unavailable.",
       loadingStages: [
         "Stage 1 of 5: Querying official data.gov.in API records with filters...",
         "Stage 2 of 5: Checking verified official records across horizon...",
-        "Stage 3 of 5: Checking master-data.csv & building feature vectors...",
+        "Stage 3 of 5: Checking official mandi archives & building feature vectors...",
         "Stage 4 of 5: Executing CatBoost ML model inference for missing dates...",
         "Stage 5 of 5: Finalizing verified predictions & conformal intervals..."
       ]
@@ -358,8 +358,8 @@ export const translations: Record<Language, TranslationDictionary> = {
       permissionDenied: "Location permission denied. Defaulting to AP central markets."
     },
     trends: {
-      title: "Price Trends & History",
-      subtitle: "Authentic historical mandi prices exclusively from official observations over the last 30 days",
+      title: "Historical Price Trends",
+      subtitle: "Official observed APMC mandi prices from the last 30 days.",
       noRecentData: "No official price observations found in the last 30 days for the selected crop and market.",
       officialOnly: "Exclusively Official Observed Records (No ML Predictions / Synthetic Data)",
       selectCrop: "Filter by Crop",
@@ -556,7 +556,7 @@ export const translations: Record<Language, TranslationDictionary> = {
       threeDayForecast: "3 రోజుల ధరల అంచనా",
       officialApiValue: "అధికారిక API విలువ",
       officialDatabaseValue: "డేటాబేస్ అధికారిక రికార్డు",
-      officialCsvValue: "అధికారిక CSV రికార్డు",
+      officialCsvValue: "అధికారిక రికార్డు విలువ",
       predictedModelValue: "మోడల్ అంచనా వేసిన ధర",
       fallbackValue: "బేస్‌లైన్ ధర",
       priceUnavailable: "ధర అందుబాటులో లేదు",
@@ -578,7 +578,7 @@ export const translations: Record<Language, TranslationDictionary> = {
       staleDataWarning: "అధికారిక డేటా 2 రోజుల కంటే పాతది. data.gov.in లో కొత్త డేటా రాలేదు.",
       dataVerification: "డేటా ధృవీకరణ వివరాలు",
       apiChecked: "అధికారిక API తనిఖీ చేయబడింది",
-      csvChecked: "మాస్టర్ CSV తనిఖీ చేయబడింది",
+      csvChecked: "అధికారిక రికార్డులు తనిఖీ చేయబడ్డాయి",
       predictionGenerated: "అంచనా రూపొందించబడింది",
       source: "ధర మూలం",
       modelVersion: "మోడల్ వెర్షన్",
@@ -594,11 +594,11 @@ export const translations: Record<Language, TranslationDictionary> = {
       currentPriceCardSubtitle: "APMC మార్కెట్ యార్డ్ నుండి ధృవీకరించబడిన తాజా రికార్డు",
       historyPriceCardTitle: "చారిత్రక అధికారిక ధర",
       historyPriceCardSubtitle: "ఎంచుకున్న తేదీకి మార్కెట్ యార్డ్ అధికారిక రికార్డు",
-      loadingSubtitle: "ఖచ్చితమైన 5-స్థాయి ప్రాధాన్యతను అమలు చేస్తోంది: అధికారిక API → CSV → డేటాబేస్ → ML అంచనా → ఫాల్‌బ్యాక్.",
+      loadingSubtitle: "ఖచ్చితమైన 5-స్థాయి ప్రాధాన్యతను అమలు చేస్తోంది: అధికారిక API → అధికారిక రికార్డులు → డేటాబేస్ → ML అంచనా → ఫాల్‌బ్యాక్.",
       loadingStages: [
         "దశ 1/5: data.gov.in అధికారిక API నుండి రికార్డులను శోధిస్తోంది...",
         "దశ 2/5: అధికారిక రికార్డులను ధృవీకరిస్తోంది...",
-        "దశ 3/5: మాస్టర్ డేటాను తనిఖీ చేసి ఫీచర్లను సిద్ధం చేస్తోంది...",
+        "దశ 3/5: అధికారిక రికార్డులను తనిఖీ చేసి ఫీచర్లను సిద్ధం చేస్తోంది...",
         "దశ 4/5: మిగిలిన తేదీలకు CatBoost ML మోడల్ ద్వారా అంచనా వేస్తోంది...",
         "దశ 5/5: తుది ధరల అంచనా మరియు పరిధులను సిద్ధం చేస్తోంది..."
       ]
@@ -611,8 +611,8 @@ export const translations: Record<Language, TranslationDictionary> = {
       permissionDenied: "లొకేషన్ అనుమతి నిరాకరించబడింది."
     },
     trends: {
-      title: "ధరల ట్రెండ్స్ & చరిత్ర",
-      subtitle: "గత 30 రోజుల్లో అధికారిక మార్కెట్ రికార్డుల ఆధారంగా ధరల విశ్లేషణ",
+      title: "చారిత్రక ధరల ట్రెండ్స్",
+      subtitle: "గత 30 రోజుల అధికారిక APMC మండి ధరల రికార్డులు.",
       noRecentData: "గత 30 రోజుల్లో ఈ పంట మరియు మార్కెట్‌కు అధికారిక రికార్డులు లేవు.",
       officialOnly: "కేవలం అధికారిక రికార్డులు మాత్రమే (అంచనాలు లేవు)",
       selectCrop: "పంటను ఎంచుకోండి",
@@ -809,7 +809,7 @@ export const translations: Record<Language, TranslationDictionary> = {
       threeDayForecast: "3-दिवसीय मूल्य पूर्वानुमान",
       officialApiValue: "आधिकारिक API मूल्य",
       officialDatabaseValue: "डेटाबेस आधिकारिक रिकॉर्ड",
-      officialCsvValue: "आधिकारिक CSV रिकॉर्ड",
+      officialCsvValue: "आधिकारिक रिकॉर्ड मूल्य",
       predictedModelValue: "मॉडल द्वारा अनुमानित मूल्य",
       fallbackValue: "बेसलाइन मूल्य",
       priceUnavailable: "मूल्य अनुपलब्ध",
@@ -831,7 +831,7 @@ export const translations: Record<Language, TranslationDictionary> = {
       staleDataWarning: "आधिकारिक डेटा 2 दिन से अधिक पुराना है।",
       dataVerification: "डेटा सत्यापन और ट्रेस",
       apiChecked: "आधिकारिक API जांची गई",
-      csvChecked: "मास्टर CSV जांची गई",
+      csvChecked: "आधिकारिक रिकॉर्ड जांचे गए",
       predictionGenerated: "पूर्वानुमान जनरेट हुआ",
       source: "मूल्य स्रोत",
       modelVersion: "मॉडल संस्करण",
@@ -847,11 +847,11 @@ export const translations: Record<Language, TranslationDictionary> = {
       currentPriceCardSubtitle: "APMC मंडी से सत्यापित वास्तविक आधिकारिक रिकॉर्ड",
       historyPriceCardTitle: "ऐतिहासिक आधिकारिक मूल्य",
       historyPriceCardSubtitle: "चयनित तिथि के लिए आधिकारिक रिकॉर्ड",
-      loadingSubtitle: "सख्त 5-स्तरीय प्राथमिकता: आधिकारिक API → CSV → डेटाबेस → CatBoost ML → फॉलबैक।",
+      loadingSubtitle: "सख्त 5-स्तरीय प्राथमिकता: आधिकारिक API → आधिकारिक रिकॉर्ड → डेटाबेस → CatBoost ML → फॉलबैक।",
       loadingStages: [
         "चरण 1/5: data.gov.in आधिकारिक API से मंडी मूल्य रिकॉर्ड प्राप्त किए जा रहे हैं...",
         "चरण 2/5: 4-दिवसीय क्षितिज पर सत्यापित आधिकारिक रिकॉर्ड की जांच हो रही है...",
-        "चरण 3/5: मास्टर डेटा की जांच और फ़ीचर वेक्टर्स का निर्माण...",
+        "चरण 3/5: आधिकारिक रिकॉर्ड की जांच और फ़ीचर वेक्टर्स का निर्माण...",
         "चरण 4/5: शेष तिथियों के लिए CatBoost ML मॉडल इंफ़रेंस निष्पादित किया जा रहा है...",
         "चरण 5/5: सत्यापित पूर्वानुमान और कॉन्फ़ॉर्मल इंटरवल्स को अंतिम रूप दिया जा रहा है..."
       ]
@@ -864,8 +864,8 @@ export const translations: Record<Language, TranslationDictionary> = {
       permissionDenied: "स्थान अनुमति अस्वीकृत।"
     },
     trends: {
-      title: "मूल्य रुझान और इतिहास",
-      subtitle: "पिछले 30 दिनों में केवल आधिकारिक अवलोकनों से प्राप्त वास्तविक मंडी भाव",
+      title: "ऐतिहासिक भाव रुझान",
+      subtitle: "पिछले 30 दिनों के आधिकारिक APMC मंडी भाव।",
       noRecentData: "पिछले 30 दिनों में इस फसल और मंडी के लिए कोई आधिकारिक रिकॉर्ड नहीं मिला।",
       officialOnly: "केवल आधिकारिक रिकॉर्ड (कोई अनुमान नहीं)",
       selectCrop: "फसल चुनें",
@@ -1062,7 +1062,7 @@ export const translations: Record<Language, TranslationDictionary> = {
       threeDayForecast: "3 ദിവസത്തെ വില പ്രവചനം",
       officialApiValue: "ഔദ്യോഗിക API വില",
       officialDatabaseValue: "ഡാറ്റാബേസ് രേഖ",
-      officialCsvValue: "ഔദ്യോഗിക CSV രേഖ",
+      officialCsvValue: "ഔദ്യോഗിക രേഖാപരമായ വില",
       predictedModelValue: "മോഡൽ പ്രവചിച്ച വില",
       fallbackValue: "ബേസ്‌ലൈൻ വില",
       priceUnavailable: "വില ലഭ്യമല്ല",
@@ -1084,7 +1084,7 @@ export const translations: Record<Language, TranslationDictionary> = {
       staleDataWarning: "ഔദ്യോഗിക ഡാറ്റ 2 ദിവസത്തിൽ കൂടുതൽ പഴക്കമുള്ളതാണ്.",
       dataVerification: "ഡാറ്റാ പരിശോധനാ വിവരങ്ങൾ",
       apiChecked: "ഔദ്യോഗിക API പരിശോധിച്ചു",
-      csvChecked: "മാസ്റ്റർ CSV പരിശോധിച്ചു",
+      csvChecked: "ഔദ്യോഗിക രേഖകൾ പരിശോധിച്ചു",
       predictionGenerated: "പ്രവചനം തയ്യാറാക്കി",
       source: "വിലയുടെ ഉറവിടം",
       modelVersion: "മോഡൽ പതിപ്പ്",
@@ -1100,11 +1100,11 @@ export const translations: Record<Language, TranslationDictionary> = {
       currentPriceCardSubtitle: "മാർക്കറ്റിൽ നിന്ന് ലഭിച്ച ഔദ്യോഗിക വില",
       historyPriceCardTitle: "ചരിത്രപരമായ ഔദ്യോഗിക വില",
       historyPriceCardSubtitle: "തിരഞ്ഞെടുത്ത തീയതിയിലെ ഔദ്യോഗിക വില",
-      loadingSubtitle: "കർശനമായ മുൻഗണനാ ക്രമം: ഔദ്യോഗിക API → CSV → ഡാറ്റാബേസ് → CatBoost ML → ഫോൾബാക്ക്.",
+      loadingSubtitle: "കർശനമായ മുൻഗണനാ ക്രമം: ഔദ്യോഗിക API → ഔദ്യോഗിക രേഖകൾ → ഡാറ്റാബേസ് → CatBoost ML → ഫോൾബാക്ക്.",
       loadingStages: [
         "ഘട്ടം 1/5: data.gov.in ഔദ്യോഗിക API റെക്കോർഡുകൾ പരിശോധിക്കുന്നു...",
         "ഘട്ടം 2/5: 4 ദിവസത്തെ ഔദ്യോഗിക രേഖകൾ പരിശോധിക്കുന്നു...",
-        "ഘട്ടം 3/5: മാസ്റ്റർ ഡാറ്റ പരിശോധിച്ച് ഫീച്ചറുകൾ നിർമ്മിക്കുന്നു...",
+        "ഘട്ടം 3/5: ഔദ്യോഗിക രേഖകൾ പരിശോധിച്ച് ഫീച്ചറുകൾ നിർമ്മിക്കുന്നു...",
         "ഘട്ടം 4/5: ബാക്കിയുള്ള തീയതികളിലേക്ക് CatBoost ML വഴി പ്രവചിക്കുന്നു...",
         "ഘട്ടം 5/5: അന്തിമ വില പ്രവചനങ്ങളും പരിധികളും തയ്യാറാക്കുന്നു..."
       ]
@@ -1117,8 +1117,8 @@ export const translations: Record<Language, TranslationDictionary> = {
       permissionDenied: "ലൊക്കേഷൻ അനുമതി നിഷേധിച്ചു."
     },
     trends: {
-      title: "വില പ്രവണതകളും ചരിത്രവും",
-      subtitle: "കഴിഞ്ഞ 30 ദിവസങ്ങളിലെ ഔദ്യോഗിക വിപണി വിലകൾ മാത്രം",
+      title: "ചരിത്രപരമായ വില പ്രവണതകൾ",
+      subtitle: "കഴിഞ്ഞ 30 ദിവസത്തെ ഔദ്യോഗിക APMC വിപണി വിലകൾ.",
       noRecentData: "കഴിഞ്ഞ 30 ദിവസങ്ങളിൽ ഔദ്യോഗിക രേഖകൾ ഒന്നും ലഭ്യമല്ല.",
       officialOnly: "ഔദ്യോഗിക രേഖകൾ മാത്രം",
       selectCrop: "വിള തിരഞ്ഞെടുക്കുക",
@@ -1315,7 +1315,7 @@ export const translations: Record<Language, TranslationDictionary> = {
       threeDayForecast: "3 நாள் விலை கணிப்பு",
       officialApiValue: "அதிகாரப்பூர்வ API விலை",
       officialDatabaseValue: "தரவுத்தள அதிகாரப்பூர்வ பதிவு",
-      officialCsvValue: "அதிகாரப்பூர்வ CSV பதிவு",
+      officialCsvValue: "அதிகாரப்பூர்வ பதிவு விலை",
       predictedModelValue: "மாதிரி கணித்த விலை",
       fallbackValue: "அடிப்படை விலை",
       priceUnavailable: "விலை கிடைக்கவில்லை",
@@ -1337,7 +1337,7 @@ export const translations: Record<Language, TranslationDictionary> = {
       staleDataWarning: "அதிகாரப்பூர்வ தரவு 2 நாட்களுக்கு மேல் பழமையானது.",
       dataVerification: "தரவு சரிபார்ப்பு விவரங்கள்",
       apiChecked: "அதிகாரப்பூர்வ API சரிபார்க்கப்பட்டது",
-      csvChecked: "முதன்மை CSV சரிபார்க்கப்பட்டது",
+      csvChecked: "அதிகாரப்பூர்வ பதிவுகள் சரிபார்க்கப்பட்டன",
       predictionGenerated: "கணிப்பு உருவாக்கப்பட்டது",
       source: "விலை ஆதாரம்",
       modelVersion: "மாதிரி பதிப்பு",
@@ -1353,11 +1353,11 @@ export const translations: Record<Language, TranslationDictionary> = {
       currentPriceCardSubtitle: "APMC மண்டியின் உண்மையான அதிகாரப்பூர்வ பதிவு",
       historyPriceCardTitle: "வரலாற்று அதிகாரப்பூர்வ விலை",
       historyPriceCardSubtitle: "தேர்ந்தெடுக்கப்பட்ட தேதிக்கான அதிகாரப்பூர்வ பதிவு",
-      loadingSubtitle: "துல்லியமான 5-நிலை முன்னுரிமை: அதிகாரப்பூர்வ API → CSV → தரவுத்தளம் → CatBoost ML → ஃபால்பேக்.",
+      loadingSubtitle: "துல்லியமான 5-நிலை முன்னுரிமை: அதிகாரப்பூர்வ API → அதிகாரப்பூர்வ பதிவு → தரவுத்தளம் → CatBoost ML → ஃபால்பேக்.",
       loadingStages: [
         "நிலை 1/5: data.gov.in அதிகாரப்பூர்வ API பதிவுகளை சரிபார்க்கிறது...",
         "நிலை 2/5: 4-நாள் அதிகாரப்பூர்வ பதிவுகளை சரிபார்க்கிறது...",
-        "நிலை 3/5: முதன்மைத் தரவை சரிபார்த்து அம்சங்களை உருவாக்குகிறது...",
+        "நிலை 3/5: அதிகாரப்பூர்வ பதிவுகளை சரிபார்த்து அம்சங்களை உருவாக்குகிறது...",
         "நிலை 4/5: மீதமுள்ள தேதிகளுக்கு CatBoost ML மூலம் கணிக்கிறது...",
         "நிலை 5/5: இறுதி விலை கணிப்புகள் மற்றும் வரம்புகளை தயார் செய்கிறது..."
       ]
@@ -1370,8 +1370,8 @@ export const translations: Record<Language, TranslationDictionary> = {
       permissionDenied: "இருப்பிட அனுமதி மறுக்கப்பட்டது."
     },
     trends: {
-      title: "விலை போக்குகள் & வரலாறு",
-      subtitle: "கடந்த 30 நாட்களில் அதிகாரப்பூர்வ பதிவுகளின் அடிப்படையிலான விலை பகுப்பாய்வு",
+      title: "வரலாற்று விலை போக்குகள்",
+      subtitle: "கடந்த 30 நாட்களின் அதிகாரப்பூர்வ APMC மண்டி விலைகள்.",
       noRecentData: "கடந்த 30 நாட்களில் இந்த பயிர் மற்றும் மண்டிக்கு அதிகாரப்பூர்வ பதிவுகள் எதுவும் இல்லை.",
       officialOnly: "அதிகாரப்பூர்வ பதிவுகள் மட்டுமே (கணிப்புகள் இல்லை)",
       selectCrop: "பயிரைத் தேர்ந்தெடுக்கவும்",

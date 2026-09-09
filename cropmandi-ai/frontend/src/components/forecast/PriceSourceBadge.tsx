@@ -55,7 +55,7 @@ export const PriceSourceBadge: React.FC<PriceSourceBadgeProps> = ({
           }}
         >
           <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#0284c7' }}></span>
-          {sourceLabel || 'Official value from master-data.csv'}
+          {sourceLabel || 'Official recorded value'}
         </span>
       );
 

@@ -27,14 +27,15 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
         background: '#f8fafc',
         borderRadius: '14px',
         border: '1px solid #e2e8f0',
-        padding: '1.25rem',
-        gap: '1rem',
+        padding: '1rem',
+        gap: '0.85rem',
+        width: '100%',
       }}
     >
       <div
         style={{
           width: '100%',
-          maxHeight: '320px',
+          maxHeight: '260px',
           borderRadius: '10px',
           overflow: 'hidden',
           display: 'flex',
@@ -48,47 +49,40 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
           alt="Crop Leaf Preview"
           style={{
             maxWidth: '100%',
-            maxHeight: '320px',
+            maxHeight: '260px',
             objectFit: 'contain',
             borderRadius: '10px',
           }}
         />
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', flexWrap: 'wrap', gap: '0.75rem' }}>
-        <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', flexWrap: 'wrap', gap: '0.65rem' }}>
+        <div className="min-w-0" style={{ flex: 1 }}>
           {fileName && (
-            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b' }}>
+            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }} className="truncate">
               {fileName}
             </div>
           )}
           {fileSizeMb !== undefined && (
-            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+            <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
               Size: {fileSizeMb.toFixed(2)} MB
             </div>
           )}
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0 }}>
           <button
             type="button"
             onClick={onReplace}
             disabled={disabled}
+            className="btn-secondary"
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              padding: '0.45rem 0.85rem',
-              borderRadius: '8px',
-              border: '1px solid #cbd5e1',
-              background: '#ffffff',
-              color: '#334155',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              cursor: disabled ? 'not-allowed' : 'pointer',
+              padding: '0.4rem 0.75rem',
+              fontSize: '0.78rem',
+              minHeight: '38px',
             }}
           >
-            <RefreshCw size={14} />
+            <RefreshCw size={13} />
             <span>Replace</span>
           </button>
 
@@ -99,18 +93,19 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.35rem',
-              padding: '0.45rem 0.85rem',
+              gap: '0.3rem',
+              padding: '0.4rem 0.75rem',
               borderRadius: '8px',
               border: '1px solid #fecaca',
               background: '#fef2f2',
               color: '#dc2626',
-              fontSize: '0.8rem',
-              fontWeight: 600,
+              fontSize: '0.78rem',
+              fontWeight: 700,
               cursor: disabled ? 'not-allowed' : 'pointer',
+              minHeight: '38px',
             }}
           >
-            <Trash2 size={14} />
+            <Trash2 size={13} />
             <span>Remove</span>
           </button>
         </div>

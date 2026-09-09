@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { VerifiedForecastResponse, ForecastRecord } from '../../services/forecastService';
 import type { Language } from '../../i18n/translations';
 import { t } from '../../i18n/translations';
-import { Check, TrendingUp, TrendingDown, Minus, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Check, TrendingUp, TrendingDown, Minus, AlertTriangle, ShieldCheck, ChevronDown, ChevronUp } from 'lucide-react';
 import { getDistrictForMarket } from '../../utils/cropMarkets';
 import { getLocalizedDistrictName, getLocalizedMarketName } from '../../utils/i18nData';
+import { DataVerificationPanel } from './DataVerificationPanel';
 
 export interface ForecastResultProps {
   data: VerifiedForecastResponse;
@@ -12,6 +13,8 @@ export interface ForecastResultProps {
 }
 
 export const ForecastResult: React.FC<ForecastResultProps> = ({ data, language = 'en' }) => {
+  const [expandedCardIndex, setExpandedCardIndex] = useState<number | null>(null);
+
   if (!data || !data.records || data.records.length === 0) {
     return null;
   }
@@ -125,36 +128,58 @@ export const ForecastResult: React.FC<ForecastResultProps> = ({ data, language =
       recTitle = 'बेचें या रोकें (स्थिर मंडी भाव)';
       recDescription = `अगले 2 दिनों में भाव स्थिर रहने की संभावना है। अपनी सुविधा के अनुसार निर्णय लें।`;
     }
+  } else if (language === 'ml') {
+    if (twoDayDiff > 10 || twoDayPct > 1.0) {
+      recTitle = 'വിള സൂക്ഷിക്കുക (2 ദിവസം കാത്തിരിക്കുക)';
+      recDescription = `അടുത്ത 2 ദിവസങ്ങളിൽ വില ക്വിന്റലിന് ₹${Math.abs(twoDayDiff).toFixed(2)} വർദ്ധിക്കാൻ സാധ്യതയുണ്ട്. കൂടുതൽ ലാഭത്തിനായി വിള സൂക്ഷിക്കുന്നത് നല്ലതാണ്.`;
+    } else if (twoDayDiff < -10 || twoDayPct < -1.0) {
+      recTitle = 'ഇപ്പോൾ വിൽക്കുക (വില കുറയാൻ സാധ്യത)';
+      recDescription = `അടുത്ത 2 ദിവസങ്ങളിൽ വില ക്വിന്റലിന് ₹${Math.abs(twoDayDiff).toFixed(2)} കുറയാൻ സാധ്യതയുണ്ട്. നഷ്ടം ഒഴിവാക്കാൻ നിലവിലെ വിലയിൽ വിൽക്കുന്നത് നല്ലതാണ്.`;
+    } else {
+      recTitle = 'വിൽക്കുകയോ സൂക്ഷിക്കുകയോ ചെയ്യുക (സ്ഥിരതയുള്ള വിലകൾ)';
+      recDescription = `അടുത്ത 2 ദിവസങ്ങളിൽ വിലകൾ മാറ്റമില്ലാതെ തുടരാൻ സാധ്യതയുണ്ട്. നിങ്ങളുടെ സൗകര്യത്തിനനുസരിച്ച് തീരുമാനിക്കാം.`;
+    }
+  } else if (language === 'ta') {
+    if (twoDayDiff > 10 || twoDayPct > 1.0) {
+      recTitle = 'பயிரை வைத்திருக்கவும் (2 நாட்கள் காத்திருக்கவும்)';
+      recDescription = `அடுத்த 2 நாட்களில் விலை குவிண்டாலுக்கு ₹${Math.abs(twoDayDiff).toFixed(2)} அதிகரிக்க வாய்ப்புள்ளது. அதிக லாபத்திற்கு பயிரை வைத்திருப்பது நல்லது.`;
+    } else if (twoDayDiff < -10 || twoDayPct < -1.0) {
+      recTitle = 'உடனே விற்கவும் (விலை குறைய வாய்ப்புள்ளது)';
+      recDescription = `அடுத்த 2 நாட்களில் விலை குவிண்டாலுக்கு ₹${Math.abs(twoDayDiff).toFixed(2)} குறைய வாய்ப்புள்ளது. இழப்பைத் தவிர்க்க தற்போதைய விலையில் விற்பது நல்லது.`;
+    } else {
+      recTitle = 'விற்கவும் அல்லது வைத்திருக்கவும் (நிலையான விலை)';
+      recDescription = `அடுத்த 2 நாட்களில் விலை நிலையாக இருக்க வாய்ப்புள்ளது. உங்கள் வசதிக்கேற்ப முடிவு செய்யலாம்.`;
+    }
   }
 
   const topBorderAccents = ['#10b981', '#f59e0b', '#3b82f6'];
   const dayPills = [t('forecast.day1', {}, language), t('forecast.day2', {}, language), t('forecast.day3', {}, language)];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginTop: '0.25rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.25rem', width: '100%' }}>
       
-      {/* 1. Today Unavailable / Stale Warning (if today's official record is missing) */}
+      {/* 1. Today Unavailable / Stale Warning */}
       {!todayOfficialExists && isSelectedToday && (
         <div
           style={{
             background: '#fffbeb',
             border: '1.5px solid #fde68a',
             borderRadius: '12px',
-            padding: '0.85rem 1.25rem',
+            padding: '0.75rem 1rem',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.75rem',
+            gap: '0.65rem',
             color: '#92400e',
-            fontSize: '0.85rem',
+            fontSize: '0.82rem',
             fontWeight: 600,
           }}
         >
-          <AlertTriangle size={20} color="#b45309" strokeWidth={2.2} />
-          <div>
+          <AlertTriangle size={18} color="#b45309" strokeWidth={2.2} style={{ flexShrink: 0 }} />
+          <div className="min-w-0 break-words">
             <span>{t('forecast.todayOfficialUnavailable', {}, language)} </span>
             <span style={{ fontWeight: 700 }}>{t('forecast.showingLatestOfficialValue', {}, language)}</span>
             {data.data_age_days !== undefined && data.data_age_days > 0 && (
-              <span style={{ marginLeft: '0.4rem', color: '#b45309' }}>
+              <span style={{ marginLeft: '0.35rem', color: '#b45309' }}>
                 ({t('forecast.dataAge', {}, language)}: {data.data_age_days} days)
               </span>
             )}
@@ -170,80 +195,84 @@ export const ForecastResult: React.FC<ForecastResultProps> = ({ data, language =
           borderRadius: '16px',
           border: '1px solid #e2e8f0',
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
+          flexDirection: 'column',
           gap: '1rem',
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+          width: '100%',
         }}
       >
-        {/* Left: Verification Icon + Latest Observed Price */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
+        {/* Top: Observed Price */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', minWidth: 0, flex: 1 }}>
+            <div
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                background: showSimpleTodayView ? '#dcfce7' : '#e0f2fe',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                marginTop: '0.15rem',
+              }}
+            >
+              {showSimpleTodayView ? (
+                <Check size={22} color="#16a34a" strokeWidth={2.8} />
+              ) : (
+                <ShieldCheck size={22} color="#0284c7" strokeWidth={2.2} />
+              )}
+            </div>
+
+            <div className="min-w-0" style={{ flex: 1 }}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.3px', display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+                <span>
+                  {showSimpleTodayView
+                    ? `${t('forecast.currentPriceCardTitle', {}, language)} (${observationDateStr})`
+                    : `${t('forecast.latestObserved', {}, language)} (${observationDateStr})`
+                  }
+                </span>
+              </div>
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1e293b', marginTop: '0.15rem' }} className="break-words">
+                📍 {getLocalizedMarketName(data.market, language)} • {getLocalizedDistrictName(data.district && data.district !== 'Andhra Pradesh' ? data.district : getDistrictForMarket(data.market), language)}
+              </div>
+              
+              <div className="responsive-hero-price" style={{ fontWeight: 800, color: '#000000', lineHeight: 1.15, marginTop: '0.35rem' }}>
+                {basePrice !== null && basePrice > 0 ? (
+                  <>
+                    ₹{basePrice.toFixed(2)}
+                    <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#64748b', marginLeft: '0.35rem' }}>
+                      {t('common.unitQuintal', {}, language)}
+                    </span>
+                  </>
+                ) : (
+                  <span style={{ fontSize: '1.15rem', color: '#94a3b8' }}>{t('forecast.priceUnavailable', {}, language)}</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* 1-Day / Expected Trend Badge Box */}
           <div
             style={{
-              width: '44px',
-              height: '44px',
-              borderRadius: '50%',
-              background: showSimpleTodayView ? '#dcfce7' : '#e0f2fe',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
+              gap: '0.65rem',
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              padding: '0.55rem 0.95rem',
+              borderRadius: '12px',
               flexShrink: 0,
             }}
           >
-            {showSimpleTodayView ? (
-              <Check size={24} color="#16a34a" strokeWidth={2.8} />
-            ) : (
-              <ShieldCheck size={24} color="#0284c7" strokeWidth={2.2} />
-            )}
-          </div>
-
-          <div>
-            <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.3px', display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
-              <span>
-                {showSimpleTodayView
-                  ? `${t('forecast.currentPriceCardTitle', {}, language)} (${observationDateStr})`
-                  : `${t('forecast.latestObserved', {}, language)} (${observationDateStr})`
-                }
-              </span>
-              <span style={{ background: '#f1f5f9', color: '#1e293b', border: '1px solid #cbd5e1', padding: '0.12rem 0.5rem', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 700, textTransform: 'none' }}>
-                📍 {getLocalizedMarketName(data.market, language)} • {getLocalizedDistrictName(data.district && data.district !== 'Andhra Pradesh' ? data.district : getDistrictForMarket(data.market), language)}
-              </span>
-            </div>
-            <div className="responsive-hero-price" style={{ fontWeight: 800, color: '#000000', lineHeight: 1.15, marginTop: '0.2rem' }}>
-              {basePrice !== null && basePrice > 0 ? (
-                <>
-                  ₹{basePrice.toFixed(2)}
-                  <span style={{ fontSize: '0.95rem', fontWeight: 500, color: '#64748b', marginLeft: '0.35rem' }}>
-                    {t('common.unitQuintal', {}, language)}
-                  </span>
-                </>
-              ) : (
-                <span style={{ fontSize: '1.2rem', color: '#94a3b8' }}>{t('forecast.priceUnavailable', {}, language)}</span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Right: 1-Day / Expected Trend Box */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            background: '#f1f5f9',
-            border: '1px solid #e2e8f0',
-            padding: '0.65rem 1.15rem',
-            borderRadius: '12px',
-          }}
-        >
-          <TrendIcon size={22} color={trendColor} strokeWidth={2.5} />
-          <div>
-            <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
-              {showSimpleTodayView ? t('forecast.currentOneDayTrend', {}, language) : t('forecast.expectedTrend', {}, language)}
-            </div>
-            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
-              {trendLabel}
+            <TrendIcon size={20} color={trendColor} strokeWidth={2.5} />
+            <div>
+              <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                {showSimpleTodayView ? t('forecast.currentOneDayTrend', {}, language) : t('forecast.expectedTrend', {}, language)}
+              </div>
+              <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#0f172a' }}>
+                {trendLabel}
+              </div>
             </div>
           </div>
         </div>
@@ -258,74 +287,79 @@ export const ForecastResult: React.FC<ForecastResultProps> = ({ data, language =
             border: `1.5px solid ${recBorder}`,
             borderRadius: '16px',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '1rem',
+            flexDirection: 'column',
+            gap: '0.75rem',
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+            width: '100%',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', minWidth: 0, flex: 1 }}>
+              <div
+                style={{
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '50%',
+                  background: recIconBg,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <RecIcon size={20} color={recColor} strokeWidth={2.5} />
+              </div>
+              <div className="min-w-0" style={{ flex: 1 }}>
+                <div style={{ fontSize: '0.7rem', fontWeight: 800, color: recColor, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                  {t('forecast.advisoryTitle', {}, language)}
+                </div>
+                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', marginTop: '0.1rem' }} className="break-words">
+                  {recTitle}
+                </div>
+                <p style={{ fontSize: '0.82rem', color: '#334155', fontWeight: 500, margin: '0.25rem 0 0 0', lineHeight: 1.45 }} className="break-words">
+                  {recDescription}
+                </p>
+              </div>
+            </div>
+
             <div
               style={{
-                width: '44px',
-                height: '44px',
-                borderRadius: '50%',
-                background: recIconBg,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                padding: '0.35rem 0.85rem',
+                borderRadius: '50px',
+                fontWeight: 800,
+                fontSize: '0.82rem',
+                background: recBadgeBg,
+                color: recColor,
+                border: `1.5px solid ${recBorder}`,
+                alignSelf: 'flex-start',
                 flexShrink: 0,
               }}
             >
-              <RecIcon size={22} color={recColor} strokeWidth={2.5} />
+              {recBadgeText}
             </div>
-            <div>
-              <div style={{ fontSize: '0.75rem', fontWeight: 800, color: recColor, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                {t('forecast.advisoryTitle', {}, language)}
-              </div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', marginTop: '0.1rem' }}>
-                {recTitle}
-              </div>
-              <p style={{ fontSize: '0.85rem', color: '#334155', fontWeight: 500, margin: '0.2rem 0 0 0', maxWidth: '700px' }}>
-                {recDescription}
-              </p>
-            </div>
-          </div>
-
-          <div
-            style={{
-              padding: '0.5rem 1.15rem',
-              borderRadius: '50px',
-              fontWeight: 800,
-              fontSize: '0.88rem',
-              background: recBadgeBg,
-              color: recColor,
-              border: `1.5px solid ${recBorder}`,
-            }}
-          >
-            {recBadgeText}
           </div>
         </div>
       )}
 
-      {/* 4. Forecast Target-Date Cards (Displayed ONLY in Past-Date or Forecast Mode, HIDDEN in Simple Today View) */}
+      {/* 4. Forecast Target-Date Cards */}
       {!showSimpleTodayView && (
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+        <div style={{ width: '100%' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.65rem', flexWrap: 'wrap', gap: '0.35rem' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
               {t('forecast.threeDayForecast', {}, language)}
             </h3>
-            <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
+            <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>
               {t('forecast.forecastOrigin', {}, language)}: {selectedDateStr}
             </span>
           </div>
 
+          {/* Stack vertically on mobile, multi-column on tablet/desktop */}
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-              gap: '1.15rem',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))',
+              gap: '0.85rem',
+              width: '100%',
             }}
           >
             {displayRecords.map((record, index) => {
@@ -387,7 +421,7 @@ export const ForecastResult: React.FC<ForecastResultProps> = ({ data, language =
               } else if (isOfficialCsv) {
                 cardHeaderTitle = t('forecast.officialCsvValue', {}, language);
                 cardHeaderSub = '(Recorded)';
-                cardBadgeText = 'Master Data CSV';
+                cardBadgeText = 'Official Recorded';
                 cardHeaderColor = '#15803d';
                 cardBadgeBg = '#dcfce7';
                 cardBadgeColor = '#166534';
@@ -414,19 +448,22 @@ export const ForecastResult: React.FC<ForecastResultProps> = ({ data, language =
                 cardBadgeColor = '#991b1b';
               }
 
+              const isCardExpanded = expandedCardIndex === index;
+
               return (
                 <div
                   key={`card-${index}-${targetDateStr}`}
                   style={{
                     background: '#ffffff',
-                    borderRadius: '16px',
+                    borderRadius: '14px',
                     border: '1px solid #e2e8f0',
                     borderTop: `4px solid ${topBorderAccents[index % 3]}`,
-                    padding: '1.25rem 1.15rem',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.03)',
+                    padding: '1rem',
+                    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.03)',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '0.85rem',
+                    gap: '0.65rem',
+                    width: '100%',
                   }}
                 >
                   {/* Header: Day Pill & Target Date */}
@@ -451,15 +488,15 @@ export const ForecastResult: React.FC<ForecastResultProps> = ({ data, language =
                   {/* Sub-header Badges */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.35rem' }}>
                     <div style={{ fontSize: '0.72rem', fontWeight: 800, color: cardHeaderColor, textTransform: 'uppercase' }}>
-                      {cardHeaderTitle} <br /><span style={{ fontWeight: 700 }}>{cardHeaderSub}</span>
+                      {cardHeaderTitle} <span style={{ fontWeight: 600 }}>{cardHeaderSub}</span>
                     </div>
                     <span
                       style={{
                         background: cardBadgeBg,
                         color: cardBadgeColor,
-                        fontSize: '0.68rem',
+                        fontSize: '0.65rem',
                         fontWeight: 700,
-                        padding: '0.2rem 0.55rem',
+                        padding: '0.15rem 0.5rem',
                         borderRadius: '9999px',
                         textTransform: 'uppercase',
                         letterSpacing: '0.2px',
@@ -474,15 +511,15 @@ export const ForecastResult: React.FC<ForecastResultProps> = ({ data, language =
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem' }}>
                       {currentPrice !== null ? (
                         <>
-                          <span style={{ fontSize: '1.95rem', fontWeight: 800, color: '#000000', lineHeight: 1 }}>
+                          <span style={{ fontSize: '1.75rem', fontWeight: 800, color: '#000000', lineHeight: 1 }}>
                             ₹{currentPrice % 1 === 0 ? currentPrice : currentPrice.toFixed(2)}
                           </span>
-                          <span style={{ fontSize: '0.88rem', fontWeight: 500, color: '#64748b' }}>
+                          <span style={{ fontSize: '0.82rem', fontWeight: 500, color: '#64748b' }}>
                             {t('common.unitQuintal', {}, language)}
                           </span>
                         </>
                       ) : (
-                        <span style={{ fontSize: '1.35rem', fontWeight: 800, color: '#94a3b8' }}>
+                        <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#94a3b8' }}>
                           {t('forecast.priceUnavailable', {}, language)}
                         </span>
                       )}
@@ -490,7 +527,7 @@ export const ForecastResult: React.FC<ForecastResultProps> = ({ data, language =
 
                     {/* Price Difference from Base Date */}
                     {currentPrice !== null && basePrice !== null ? (
-                      <div style={{ marginTop: '0.45rem', fontSize: '0.8rem', fontWeight: 700 }}>
+                      <div style={{ marginTop: '0.35rem', fontSize: '0.78rem', fontWeight: 700 }}>
                         {isDiffZero ? (
                           <span style={{ color: '#475569' }}>
                             — 0.00 {t('common.unitQuintal', {}, language)}
@@ -508,55 +545,79 @@ export const ForecastResult: React.FC<ForecastResultProps> = ({ data, language =
                     ) : null}
                   </div>
 
-                  {/* Bottom Box: Prediction Interval or Verification State */}
-                  <div
+                  {/* Expandable Details Button */}
+                  <button
+                    type="button"
+                    onClick={() => setExpandedCardIndex(isCardExpanded ? null : index)}
                     style={{
-                      background: '#f8fafc',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '10px',
-                      padding: '0.75rem 0.85rem',
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--primary)',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      padding: '0.2rem 0',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
                       marginTop: 'auto',
                     }}
                   >
-                    {record.interval_available && record.lower_bound != null && record.upper_bound != null ? (
-                      <>
-                        <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.3px', marginBottom: '0.35rem' }}>
-                          {t('forecast.confidenceInterval', {}, language)}
-                        </div>
-                        <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#000000', display: 'flex', gap: '0.85rem', flexWrap: 'wrap' }}>
-                          <span>{t('forecast.low', {}, language)}: ₹{record.lower_bound.toFixed(2)}</span>
-                          <span>{t('forecast.high', {}, language)}: ₹{record.upper_bound.toFixed(2)}</span>
-                        </div>
-                      </>
-                    ) : isObserved ? (
-                      <>
-                        <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.3px', marginBottom: '0.35rem' }}>
-                          {t('forecast.officialDatabaseValue', {}, language)}
-                        </div>
-                        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#475569' }}>
-                          Recorded observation ({targetDateStr})
-                        </div>
-                      </>
-                    ) : isFallback ? (
-                      <>
-                        <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#9a3412', textTransform: 'uppercase', letterSpacing: '0.3px', marginBottom: '0.35rem' }}>
-                          {t('forecast.fallbackValue', {}, language)}
-                        </div>
-                        <div style={{ fontSize: '0.72rem', fontWeight: 600, color: '#64748b' }}>
-                          {record.fallback_reason || t('warnings.fallbackUsed', {}, language)}
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#991b1b', textTransform: 'uppercase', letterSpacing: '0.3px', marginBottom: '0.35rem' }}>
+                    <span>
+                      {isCardExpanded
+                        ? (language === 'te' ? 'వివరాలు దాచు' : (language === 'hi' ? 'विवरण छिपाएं' : (language === 'ta' ? 'விவரங்களை மறை' : (language === 'ml' ? 'വിശദാംശങ്ങൾ മറയ്ക്കുക' : 'Hide details'))))
+                        : (language === 'te' ? 'వివరాలు చూడండి' : (language === 'hi' ? 'विवरण देखें' : (language === 'ta' ? 'விவரங்களைப் பார்க்க' : (language === 'ml' ? 'വിശദാംശങ്ങൾ കാണുക' : 'View details'))))
+                      }
+                    </span>
+                    {isCardExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                  </button>
+
+                  {/* Expanded Interval & Metadata */}
+                  {isCardExpanded && (
+                    <div
+                      style={{
+                        background: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '8px',
+                        padding: '0.65rem 0.75rem',
+                        marginTop: '0.25rem',
+                      }}
+                    >
+                      {record.interval_available && record.lower_bound != null && record.upper_bound != null ? (
+                        <>
+                          <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
+                            {t('forecast.confidenceInterval', {}, language)}
+                          </div>
+                          <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#000000', display: 'flex', gap: '0.65rem', flexWrap: 'wrap' }}>
+                            <span>{t('forecast.low', {}, language)}: ₹{record.lower_bound.toFixed(2)}</span>
+                            <span>{t('forecast.high', {}, language)}: ₹{record.upper_bound.toFixed(2)}</span>
+                          </div>
+                        </>
+                      ) : isObserved ? (
+                        <>
+                          <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase', marginBottom: '0.2rem' }}>
+                            {t('forecast.officialDatabaseValue', {}, language)}
+                          </div>
+                          <div style={{ fontSize: '0.72rem', color: '#475569' }}>
+                            {language === 'te' ? 'నమోదైన అధికారిక పరిశీలన' : (language === 'hi' ? 'दर्ज आधिकारिक अवलोकन' : (language === 'ta' ? 'பதிவு செய்யப்பட்ட அதிகாரப்பூர்வ தரவு' : (language === 'ml' ? 'രേഖപ്പെടുത്തിയ ഔദ്യോഗിക വിവരങ്ങൾ' : 'Recorded observation')))} ({targetDateStr})
+                          </div>
+                        </>
+                      ) : isFallback ? (
+                        <>
+                          <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#9a3412', textTransform: 'uppercase', marginBottom: '0.2rem' }}>
+                            {t('forecast.fallbackValue', {}, language)}
+                          </div>
+                          <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                            {record.fallback_reason || t('warnings.fallbackUsed', {}, language)}
+                          </div>
+                        </>
+                      ) : (
+                        <div style={{ fontSize: '0.7rem', color: '#991b1b' }}>
                           {t('forecast.priceUnavailable', {}, language)}
                         </div>
-                        <div style={{ fontSize: '0.72rem', fontWeight: 600, color: '#64748b' }}>
-                          {t('errors.noData', {}, language)}
-                        </div>
-                      </>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  )}
 
                 </div>
               );
@@ -565,16 +626,20 @@ export const ForecastResult: React.FC<ForecastResultProps> = ({ data, language =
         </div>
       )}
 
-      {/* 5. Disclaimer / Decision Guidance */}
+      {/* 5. Data Verification Panel (Accordion) */}
+      <DataVerificationPanel data={data} language={language} />
+
+      {/* 6. Disclaimer */}
       <div
         style={{
           background: '#f8fafc',
           border: '1px solid #e2e8f0',
           borderRadius: '12px',
-          padding: '0.85rem 1.25rem',
-          fontSize: '0.78rem',
+          padding: '0.75rem 1rem',
+          fontSize: '0.75rem',
           color: '#64748b',
-          lineHeight: 1.5,
+          lineHeight: 1.45,
+          width: '100%',
         }}
       >
         <span style={{ fontWeight: 700, color: '#475569' }}>{t('forecast.disclaimerTitle', {}, language)}: </span>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { Language } from '../i18n/translations';
 import { translations } from '../i18n/translations';
-import { ExternalLink, CheckCircle, Award, Landmark, Sparkles } from 'lucide-react';
+import { ExternalLink, CheckCircle, Award, Landmark, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface Props {
   language: Language;
@@ -37,6 +37,7 @@ interface Scheme {
 export const GovernmentSchemesTab: React.FC<Props> = ({ language }) => {
   const t = translations[language].schemes;
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [expandedEligibilityId, setExpandedEligibilityId] = useState<string | null>(null);
 
   const schemes: Scheme[] = [
     {
@@ -99,54 +100,28 @@ export const GovernmentSchemesTab: React.FC<Props> = ({ language }) => {
       nameMl: 'പ്രധാനമന്ത്രി ഫസൽ ബീമ യോജന (വിള ഇൻഷുറൻസ്)',
       nameTa: 'பிரதான் மந்திரி பயிர் காப்பீட்டுத் திட்டம் (PMFBY)',
       category: 'insurance',
-      benefitsEn: 'Comprehensive crop insurance against natural calamities, droughts, unseasonal rains, pests and diseases at subsidized farmer premium rates (1.5% - 2%).',
-      benefitsTe: 'ప్రకృతి వైపరీత్యాలు, అకాల వర్షాలు, కరువు మరియు తెగుళ్ల వల్ల పంట నష్టానికి అత్యల్ప ప్రీమియం రేటులో (1.5% - 2%) పూర్తి పంట పరిహార బీమా.',
-      benefitsHi: 'प्राकृतिक आपदाओं, बेमौसम बारिश, सूखे और कीटों से फसल क्षति पर न्यूनतम प्रीमियम (1.5% - 2%) पर व्यापक सुरक्षा।',
-      benefitsMl: 'പ്രകൃതിക്ഷോഭം, വരൾച്ച, കീടബാധ എന്നിവ മൂലം വിളനഷ്ടം സംഭവിച്ചാൽ കുറഞ്ഞ പ്രീമിയത്തിൽ സമഗ്ര ഇൻഷുറൻസ്.',
-      benefitsTa: 'இயற்கை சீற்றங்கள், வறட்சி, பூச்சி தாக்குதலால் ஏற்படும் பயிர் இழப்பிற்கு மிகக் குறைந்த பிரீமியத்தில் முழுமையான காப்பீடு.',
-      eligibilityEn: 'All farmers growing notified crops in notified areas including sharecroppers and tenant farmers.',
-      eligibilityTe: 'నోటిఫై చేసిన పంటలు సాగుచేసే రైతులు, కౌలుదారులు మరియు భాగస్వామ్య రైతులు.',
-      eligibilityHi: 'अधिसूचित क्षेत्रों में अधिसूचित फसलें उगाने वाले सभी किसान और बटाईदार।',
-      eligibilityMl: 'വിജ്ഞാപനം ചെയ്ത വിളകൾ കൃഷി ചെയ്യുന്ന എല്ലാ കർഷകരും പാട്ടക്കർഷകരും.',
-      eligibilityTa: 'அறிவிக்கப்பட்ட பயிர்களை பயிரிடும் அனைத்து விவசாயிகளும் குத்தகைதாரர்களும்.',
+      benefitsEn: 'Comprehensive insurance coverage against non-preventable natural risks (drought, flood, cyclone, pests) at low premium rates (2% for Kharif, 1.5% for Rabi crops).',
+      benefitsTe: 'కరువు, వరదలు, తుఫానులు మరియు తెగుళ్ళ వల్ల పంట నష్టపోతే తక్కువ ప్రీమియంతో (ఖరీఫ్‌కు 2%, రబీకి 1.5%) పూర్తి నష్టపరిహార బీమా రక్షణ.',
+      benefitsHi: 'सूखा, बाढ़, कीट प्रकोप से होने वाले फसल नुकसान पर न्यूनतम प्रीमियम (खरीफ 2%, रबी 1.5%) पर व्यापक वित्तीय सुरक्षा।',
+      benefitsMl: 'പ്രകൃതിദുരന്തങ്ങൾ മൂലം വിളനാശമുണ്ടായാൽ കുറഞ്ഞ പ്രീമിയത്തിൽ സമഗ്ര ഇൻഷുറൻസ് പരിരക്ഷ.',
+      benefitsTa: 'இயற்கை சீற்றங்களால் ஏற்படும் பயிர் இழப்பிற்கு குறைந்த பிரீமியத்தில் முழு காப்பீட்டு இழப்பீடு.',
+      eligibilityEn: 'All farmers cultivating notified crops in notified areas including sharecroppers and tenant farmers.',
+      eligibilityTe: 'నోటిఫై చేయబడిన ప్రాంతాలలో పంటలు సాగుచేసే రైతులు, కౌలు రైతులు అందరూ అర్హులు.',
+      eligibilityHi: 'अधिसूचित क्षेत्रों में अधिसूचित फसलें उगाने वाले सभी काश्तकार और पट्टेदार किसान।',
+      eligibilityMl: 'വിള ഇൻഷുറൻസ് പരിധിയിലുള്ള എല്ലാ കർഷകർക്കും അർഹതയുണ്ട്.',
+      eligibilityTa: 'அறிவிக்கப்பட்ட பயிர்களை பயிரிடும் அனைத்து விவசாயிகளும் விண்ணப்பிக்கலாம்.',
       officialUrl: 'https://pmfby.gov.in/',
-      badgeEn: 'Crop Risk & Disaster Insurance',
-      badgeTe: 'పంట నష్టపరిహారం & విపత్తు బీమా',
-      badgeHi: 'फसल जोखिम एवं आपदा सुरक्षा बीमा',
-      badgeMl: 'വിള ഇൻഷുറൻസ് & നഷ്ടപരിഹാരം',
-      badgeTa: 'பயிர் இடர் & பேரிடர் காப்பீடு',
-      imageUrl: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80'
-    },
-    {
-      id: 'enam',
-      nameEn: 'e-NAM (National Agriculture Market)',
-      nameTe: 'ఈ-నామ్ (జాతీయ వ్యవసాయ డిజిటల్ మార్కెట్)',
-      nameHi: 'ई-नाम (राष्ट्रीय कृषि डिजिटल बाजार)',
-      nameMl: 'ഇ-നാം (ദേശീയ കാർഷിക ഡിജിറ്റൽ വിപണി)',
-      nameTa: 'இ-நாம் (தேசிய விவசாய மின்னணு சந்தை)',
-      category: 'central',
-      benefitsEn: 'Pan-India electronic trading portal uniting 1,000+ APMC mandis for transparent online price bidding, weight verification, and direct digital payouts.',
-      benefitsTe: 'దేశవ్యాప్తంగా 1,000కి పైగా APMC మార్కెట్‌లను అనుసంధానించే ఆన్‌లైన్ ట్రేడింగ్ పోర్టల్ ద్వారా పోటీ ధరలు మరియు పారదర్శక వేలం.',
-      benefitsHi: '1,000+ एपीएमसी मंडियों को जोड़ने वाला अखिल भारतीय ऑनलाइन पोर्टल, पारदर्शी बोली एवं सीधा डिजिटल भुगतान।',
-      benefitsMl: '1,000-ലധികം എപിഎംസി വിപണികളെ ബന്ധിപ്പിക്കുന്ന ദേശീയ ഡിജിറ്റൽ വിപണി വഴി മികച്ച വിലയും ഓൺലൈൻ പണമിടപാടും.',
-      benefitsTa: '1,000+ மண்டிகளை இணைக்கும் தேசிய மின்னணு சந்தை மூலம் வெளிப்படையான விலை நிர்ணயம் மற்றும் நேரடி வங்கி வரவு.',
-      eligibilityEn: 'All registered farmers, traders, FPOs, and APMC market yards across India.',
-      eligibilityTe: 'భారతదేశంలోని నమోదు చేసుకున్న రైతులు, వ్యాపారులు, FPOలు మరియు వ్యవసాయ మార్కెట్ కమిటీలు.',
-      eligibilityHi: 'भारत भर के सभी पंजीकृत किसान, व्यापारी और किसान उत्पादक संगठन (FPO)।',
-      eligibilityMl: 'രജിസ്റ്റർ ചെയ്ത എല്ലാ കർഷകരും വ്യാപാരികളും കാർഷിക ഉത്പാദക സംഘങ്ങളും.',
-      eligibilityTa: 'பதிவு செய்த அனைத்து விவசாயிகள், வியாபாரிகள் மற்றும் உழவர் உற்பத்தியாளர் அமைப்புகள்.',
-      officialUrl: 'https://www.enam.gov.in/',
-      badgeEn: 'Pan-India Digital Mandi Portal',
-      badgeTe: 'దేశవ్యాప్త డిజిటల్ మండి పోర్టల్',
-      badgeHi: 'अखिल भारतीय डिजिटल मंडी नेटवर्क',
-      badgeMl: 'ദേശീയ ഡിജിറ്റൽ വിപണി പോർട്ടൽ',
-      badgeTa: 'அகில இந்திய டிஜிட்டல் மண்டி தளம்',
-      imageUrl: 'https://images.unsplash.com/photo-1586771107445-d3ca888129ff?auto=format&fit=crop&w=600&q=80'
+      badgeEn: 'Crop Insurance & Risk Protection',
+      badgeTe: 'పంట బీమా & నష్టపరిహారం',
+      badgeHi: 'फसल बीमा एवं जोखिम सुरक्षा',
+      badgeMl: 'വിള ഇൻഷുറൻസ് പരിരക്ഷ',
+      badgeTa: 'பயிர் காப்பீடு மற்றும் பாதுகாப்பு',
+      imageUrl: 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=600&q=80'
     },
     {
       id: 'kcc',
-      nameEn: 'Kisan Credit Card (KCC) Scheme',
-      nameTe: 'కిసాన్ క్రెడిట్ కార్డ్ (KCC) పథకం',
+      nameEn: 'Kisan Credit Card (KCC) Low-Interest Loans',
+      nameTe: 'కిసాన్ క్రెడిట్ కార్డ్ (KCC - తక్కువ వడ్డీ రుణాలు)',
       nameHi: 'किसान क्रेडिट कार्ड (KCC) योजना',
       nameMl: 'കിസാൻ ക്രെഡിറ്റ് കാർഡ് (KCC) പദ്ധതി',
       nameTa: 'கிசான் கிரெடிட் கார்டு (KCC) திட்டம்',
@@ -268,135 +243,171 @@ export const GovernmentSchemesTab: React.FC<Props> = ({ language }) => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%' }}>
       
       {/* Header Banner */}
-      <div className="glass-panel responsive-card-pad" style={{ borderRadius: 'var(--radius-lg)', background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(216,243,220,0.4) 100%)', borderLeft: '6px solid var(--primary)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+      <div className="glass-panel responsive-card-pad" style={{ borderRadius: 'var(--radius-lg)', background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(216,243,220,0.4) 100%)', borderLeft: '5px solid var(--primary)', width: '100%' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 700, marginBottom: '0.35rem', fontSize: '0.85rem' }}>
-              <Landmark size={18} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', color: 'var(--primary)', fontWeight: 700, marginBottom: '0.25rem', fontSize: '0.8rem' }}>
+              <Landmark size={16} />
               <span>{t.headerTag || 'OFFICIAL WELFARE & FINANCIAL SCHEMES'}</span>
             </div>
-            <h2 style={{ fontSize: 'clamp(1.25rem, 4vw, 1.75rem)', fontWeight: 800, color: 'var(--primary-dark)', margin: 0 }}>
+            <h2 style={{ fontSize: 'clamp(1.15rem, 4vw, 1.65rem)', fontWeight: 800, color: 'var(--primary-dark)', margin: 0 }}>
               {t.title}
             </h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginTop: '0.3rem', maxWidth: '800px', lineHeight: 1.45 }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginTop: '0.25rem', lineHeight: 1.4 }}>
               {t.subtitle}
             </p>
           </div>
 
-          <div className="horizontal-scroll-chips" style={{ display: 'flex', gap: '0.4rem', width: 'auto' }}>
-            <button
-              onClick={() => setSelectedCategory('all')}
-              className={selectedCategory === 'all' ? 'btn-primary' : 'btn-secondary'}
-              style={{ fontSize: '0.82rem', padding: '0.45rem 0.9rem', whiteSpace: 'nowrap', flexShrink: 0 }}
-            >
-              {t.allSchemes || 'All Schemes'}
-            </button>
-            <button
-              onClick={() => setSelectedCategory('central')}
-              className={selectedCategory === 'central' ? 'btn-primary' : 'btn-secondary'}
-              style={{ fontSize: '0.82rem', padding: '0.45rem 0.9rem', whiteSpace: 'nowrap', flexShrink: 0 }}
-            >
-              {t.centralGovt || 'Central Govt'}
-            </button>
-            <button
-              onClick={() => setSelectedCategory('ap')}
-              className={selectedCategory === 'ap' ? 'btn-primary' : 'btn-secondary'}
-              style={{ fontSize: '0.82rem', padding: '0.45rem 0.9rem', whiteSpace: 'nowrap', flexShrink: 0 }}
-            >
-              {t.andhraPradesh || 'Andhra Pradesh'}
-            </button>
-            <button
-              onClick={() => setSelectedCategory('insurance')}
-              className={selectedCategory === 'insurance' ? 'btn-primary' : 'btn-secondary'}
-              style={{ fontSize: '0.82rem', padding: '0.45rem 0.9rem', whiteSpace: 'nowrap', flexShrink: 0 }}
-            >
-              {t.insurance || 'Crop Insurance'}
-            </button>
+          {/* Horizontal Scrollable Category Pills */}
+          <div className="horizontal-scroll-chips" style={{ display: 'flex', gap: '0.4rem', width: '100%' }}>
+            {[
+              { id: 'all', label: t.allSchemes || 'All Schemes' },
+              { id: 'central', label: t.centralGovt || 'Central Govt' },
+              { id: 'ap', label: t.andhraPradesh || 'Andhra Pradesh' },
+              { id: 'insurance', label: t.insurance || 'Crop Insurance' },
+              { id: 'credit', label: language === 'te' ? 'వ్యవసాయ రుణాలు' : (language === 'hi' ? 'कृषि ऋण' : (language === 'ta' ? 'விவசாயக் கடன்' : (language === 'ml' ? 'കാർഷിക വായ്പ' : 'Credit & Loans'))) },
+            ].map((cat) => {
+              const isSelected = selectedCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={isSelected ? 'btn-primary' : 'btn-secondary'}
+                  style={{
+                    fontSize: '0.78rem',
+                    padding: '0.4rem 0.85rem',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                    minHeight: '38px',
+                  }}
+                >
+                  {cat.label}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* Grid of Schemes */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
-        {filteredSchemes.map((scheme) => (
-          <div
-            key={scheme.id}
-            className="glass-panel"
-            style={{
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--border-color)',
-              background: '#ffffff',
-            }}
-          >
-            {/* Cover Image & Badge */}
-            <div style={{ position: 'relative', height: '180px', width: '100%', overflow: 'hidden' }}>
-              <img
-                src={scheme.imageUrl}
-                alt={scheme.nameEn}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(27,67,50,0.85) 0%, transparent 60%)' }} />
-              
-              <div style={{ position: 'absolute', top: '1rem', left: '1rem' }}>
-                <span className="badge badge-green" style={{ background: '#ffffff', color: 'var(--primary-dark)', boxShadow: 'var(--shadow-sm)' }}>
-                  <Award size={14} color="var(--primary)" />
-                  {getBadge(scheme)}
-                </span>
-              </div>
+      {/* Cards: 1 Card per row on mobile, multi-column on desktop */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
+          gap: '1.15rem',
+          width: '100%',
+        }}
+      >
+        {filteredSchemes.map((scheme) => {
+          const isEligibilityOpen = expandedEligibilityId === scheme.id;
 
-              <h3 style={{ position: 'absolute', bottom: '1rem', left: '1rem', right: '1rem', color: '#ffffff', fontSize: '1.15rem', fontWeight: 800, textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
-                {getName(scheme)}
-              </h3>
-            </div>
-
-            {/* Content */}
-            <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '1.25rem' }}>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div>
-                  <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.3rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <Sparkles size={14} />
-                    {t.benefits}
-                  </div>
-                  <p style={{ fontSize: '0.92rem', color: 'var(--text-main)', fontWeight: 500, lineHeight: 1.5 }}>
-                    {getBenefits(scheme)}
-                  </p>
+          return (
+            <div
+              key={scheme.id}
+              className="glass-panel"
+              style={{
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+                borderRadius: '14px',
+                border: '1px solid var(--border-color)',
+                background: '#ffffff',
+                width: '100%',
+              }}
+            >
+              {/* Cover Image & Badge */}
+              <div style={{ position: 'relative', height: '160px', width: '100%', overflow: 'hidden' }}>
+                <img
+                  src={scheme.imageUrl}
+                  alt={scheme.nameEn}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  loading="lazy"
+                />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(27,67,50,0.85) 0%, transparent 60%)' }} />
+                
+                <div style={{ position: 'absolute', top: '0.75rem', left: '0.75rem', maxWidth: 'calc(100% - 1.5rem)' }}>
+                  <span className="badge badge-green" style={{ background: '#ffffff', color: 'var(--primary-dark)', boxShadow: 'var(--shadow-sm)', fontSize: '0.68rem' }}>
+                    <Award size={12} color="var(--primary)" />
+                    <span className="truncate">{getBadge(scheme)}</span>
+                  </span>
                 </div>
 
-                <div style={{ background: 'var(--bg-primary)', padding: '0.85rem 1rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <CheckCircle size={14} color="var(--primary)" />
-                    {t.eligibility}
+                <h3 style={{ position: 'absolute', bottom: '0.75rem', left: '0.85rem', right: '0.85rem', color: '#ffffff', fontSize: '1.05rem', fontWeight: 800, textShadow: '0 2px 4px rgba(0,0,0,0.5)', margin: 0 }} className="break-words">
+                  {getName(scheme)}
+                </h3>
+              </div>
+
+              {/* Content */}
+              <div style={{ padding: '1rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '0.85rem' }}>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  <div>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <Sparkles size={13} />
+                      {t.benefits}
+                    </div>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 500, lineHeight: 1.45 }} className="break-words">
+                      {getBenefits(scheme)}
+                    </p>
                   </div>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
-                    {getEligibility(scheme)}
-                  </p>
+
+                  {/* Expandable Eligibility Accordion */}
+                  <div style={{ background: 'var(--bg-primary)', borderRadius: '8px', border: '1px solid var(--border-color)', overflow: 'hidden' }}>
+                    <button
+                      type="button"
+                      onClick={() => setExpandedEligibilityId(isEligibilityOpen ? null : scheme.id)}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '0.65rem 0.75rem',
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
+                        color: 'var(--text-muted)',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <CheckCircle size={13} color="var(--primary)" />
+                        <span>{t.eligibility} Criteria</span>
+                      </div>
+                      {isEligibilityOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                    </button>
+
+                    {isEligibilityOpen && (
+                      <div style={{ padding: '0 0.75rem 0.75rem 0.75rem', fontSize: '0.8rem', color: '#475569', lineHeight: 1.4 }} className="break-words">
+                        {getEligibility(scheme)}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              {/* Action Link */}
-              <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
-                <a
-                  href={scheme.officialUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-primary"
-                  style={{ width: '100%', justifyContent: 'center' }}
-                >
-                  <span>{t.visitOfficialWebsite}</span>
-                  <ExternalLink size={16} />
-                </a>
-              </div>
+                {/* Action Link Button */}
+                <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
+                  <a
+                    href={scheme.officialUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-primary"
+                    style={{ width: '100%', justifyContent: 'center', minHeight: '44px', fontSize: '0.88rem' }}
+                  >
+                    <span>{t.visitOfficialWebsite}</span>
+                    <ExternalLink size={15} />
+                  </a>
+                </div>
 
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
     </div>

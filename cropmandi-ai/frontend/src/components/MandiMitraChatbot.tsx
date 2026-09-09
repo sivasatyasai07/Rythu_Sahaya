@@ -34,6 +34,18 @@ export const MandiMitraChatbot: React.FC<Props> = ({ language }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setMessages((prev) => {
+      if (prev.length === 1 && prev[0].sender === 'bot') {
+        return [{
+          ...prev[0],
+          text: translations[language]?.chatbot?.welcomeMsg || prev[0].text,
+        }];
+      }
+      return prev;
+    });
+  }, [language]);
+
+  useEffect(() => {
     if (isOpen) {
       scrollToBottom();
     }

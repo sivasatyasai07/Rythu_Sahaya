@@ -243,7 +243,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
           </div>
 
           {/* State and District */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 160px), 1fr))', gap: '0.75rem' }}>
             <div>
               <label htmlFor="prof-state" style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: 'var(--primary-dark)', marginBottom: '0.35rem' }}>
                 <MapPin size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '0.3rem' }} />
@@ -297,12 +297,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
           </div>
 
           {/* Action Buttons */}
-          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.75rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginTop: '0.75rem' }}>
             <button
               type="button"
               onClick={onClose}
               className="btn btn-outline"
-              style={{ flex: 1, padding: '0.75rem', fontWeight: 700 }}
+              style={{ flex: '1 1 120px', minHeight: '44px', padding: '0.75rem', fontWeight: 700 }}
             >
               Cancel
             </button>
@@ -310,7 +310,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
               type="submit"
               className="btn btn-primary"
               disabled={saving}
-              style={{ flex: 2, padding: '0.75rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+              style={{ flex: '2 1 160px', minHeight: '44px', padding: '0.75rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
             >
               {saving ? (
                 <span>Saving...</span>

@@ -36,38 +36,39 @@ export const AuthHeaderButton: React.FC = () => {
   if (!isAuthenticated || !user) {
     return (
       <>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
           <button
             type="button"
             onClick={openLogin}
             className="btn btn-outline"
             style={{
-              padding: '0.4rem 0.85rem',
-              fontSize: '0.88rem',
+              padding: '0.4rem 0.75rem',
+              fontSize: '0.85rem',
               fontWeight: 700,
               borderRadius: '8px',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.4rem',
+              gap: '0.35rem',
+              minHeight: '40px',
             }}
             aria-label="Log in to account"
           >
-            <LogIn size={16} />
+            <LogIn size={15} />
             <span>Login</span>
           </button>
 
           <button
             type="button"
             onClick={openSignup}
-            className="btn btn-primary"
+            className="btn btn-primary desktop-only"
             style={{
               padding: '0.4rem 0.85rem',
-              fontSize: '0.88rem',
+              fontSize: '0.85rem',
               fontWeight: 700,
               borderRadius: '8px',
-              display: 'flex',
               alignItems: 'center',
               gap: '0.4rem',
+              minHeight: '40px',
             }}
             aria-label="Create a new account"
           >
@@ -95,41 +96,52 @@ export const AuthHeaderButton: React.FC = () => {
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '0.5rem',
-          padding: '0.4rem 0.75rem',
+          gap: '0.4rem',
+          padding: '0.35rem 0.65rem',
           borderRadius: '20px',
           border: '1px solid #e2e8f0',
           backgroundColor: 'rgba(255, 255, 255, 0.95)',
           cursor: 'pointer',
           boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-          fontSize: '0.88rem',
+          fontSize: '0.85rem',
           fontWeight: 600,
           color: 'var(--primary-dark)',
           transition: 'all 0.15s ease',
+          minHeight: '40px',
+          maxWidth: '160px',
         }}
         aria-expanded={menuOpen}
         aria-label="User profile menu"
       >
         <div
           style={{
-            width: 28,
-            height: 28,
+            width: 26,
+            height: 26,
             borderRadius: '50%',
             backgroundColor: user.role === 'admin' ? '#7c3aed' : 'var(--primary)',
             color: '#ffffff',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '0.8rem',
+            fontSize: '0.78rem',
             fontWeight: 700,
+            flexShrink: 0,
           }}
         >
-          {user.role === 'admin' ? <ShieldCheck size={16} /> : <User size={16} />}
+          {user.role === 'admin' ? <ShieldCheck size={15} /> : <User size={15} />}
         </div>
-        <span style={{ fontWeight: 700, maxWidth: '130px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <span
+          style={{
+            fontWeight: 700,
+            maxWidth: '85px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
           {displayName}
         </span>
-        <ChevronDown size={14} style={{ color: '#64748b' }} />
+        <ChevronDown size={13} style={{ color: '#64748b', flexShrink: 0 }} />
       </button>
 
       {/* Dropdown Menu */}
@@ -144,7 +156,8 @@ export const AuthHeaderButton: React.FC = () => {
             boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15)',
             border: '1px solid #e2e8f0',
             width: '240px',
-            zIndex: 100,
+            maxWidth: 'calc(100vw - 1.5rem)',
+            zIndex: 1000,
             padding: '0.5rem',
           }}
         >
@@ -155,11 +168,11 @@ export const AuthHeaderButton: React.FC = () => {
               marginBottom: '0.35rem',
             }}
           >
-            <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>Signed in as</p>
-            <p style={{ margin: 0, fontSize: '0.88rem', fontWeight: 800, color: 'var(--primary-dark)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>Signed in as</p>
+            <p style={{ margin: 0, fontSize: '0.88rem', fontWeight: 800, color: 'var(--primary-dark)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {displayName}
             </p>
-            <p style={{ margin: '0.15rem 0 0 0', fontSize: '0.75rem', color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <p style={{ margin: '0.15rem 0 0 0', fontSize: '0.75rem', color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {displayEmail}
             </p>
             {profile?.preferred_language && (
@@ -167,7 +180,7 @@ export const AuthHeaderButton: React.FC = () => {
                 style={{
                   display: 'inline-block',
                   marginTop: '0.35rem',
-                  fontSize: '0.7rem',
+                  fontSize: '0.68rem',
                   fontWeight: 700,
                   backgroundColor: 'var(--accent-gold-light)',
                   color: '#92400e',
@@ -202,6 +215,7 @@ export const AuthHeaderButton: React.FC = () => {
               cursor: 'pointer',
               textAlign: 'left',
               transition: 'background 0.15s ease',
+              minHeight: '44px',
             }}
           >
             <Settings size={16} color="var(--primary)" />
@@ -229,6 +243,7 @@ export const AuthHeaderButton: React.FC = () => {
               cursor: 'pointer',
               textAlign: 'left',
               transition: 'background 0.15s ease',
+              minHeight: '44px',
             }}
           >
             <LogOut size={16} />

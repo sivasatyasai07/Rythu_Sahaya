@@ -16,9 +16,9 @@ import {
   Wrench,
   CheckCheck,
   WifiOff,
-  HelpCircle,
   ChevronDown,
   ChevronUp,
+  Info,
 } from 'lucide-react';
 import { DiagnosisConfidence } from './DiagnosisConfidence';
 
@@ -34,7 +34,10 @@ export const DiseaseResultCard: React.FC<DiseaseResultCardProps> = ({
   result,
   language = 'en',
 }) => {
-  const [showTechDetails, setShowTechDetails] = useState<boolean>(false);
+  const [symptomsOpen, setSymptomsOpen] = useState<boolean>(false);
+  const [preventionOpen, setPreventionOpen] = useState<boolean>(false);
+  const [botanicalOpen, setBotanicalOpen] = useState<boolean>(false);
+
   const dI18n = getDiseaseI18n(language);
   const status = result.analysis_status || 'success';
 
@@ -74,38 +77,39 @@ export const DiseaseResultCard: React.FC<DiseaseResultCardProps> = ({
   if (isNetworkError) {
     return (
       <div
+        className="responsive-card-pad"
         style={{
           background: '#ffffff',
           borderRadius: '16px',
           border: '1px solid #fed7aa',
           boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
-          padding: '2rem',
           display: 'flex',
           flexDirection: 'column',
-          gap: '1.25rem',
+          gap: '1rem',
+          width: '100%',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '50px',
-              height: '50px',
+              width: '44px',
+              height: '44px',
               borderRadius: '12px',
               background: '#ffedd5',
               color: '#ea580c',
               flexShrink: 0,
             }}
           >
-            <WifiOff size={28} />
+            <WifiOff size={24} />
           </div>
           <div>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: '#9a3412' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0, color: '#9a3412' }}>
               {dI18n.networkErrorTitle}
             </h3>
-            <span style={{ fontSize: '0.82rem', color: '#c2410c', fontWeight: 600 }}>
+            <span style={{ fontSize: '0.78rem', color: '#c2410c', fontWeight: 600 }}>
               Network / Internet Offline
             </span>
           </div>
@@ -116,90 +120,17 @@ export const DiseaseResultCard: React.FC<DiseaseResultCardProps> = ({
             background: '#fff7ed',
             border: '1px solid #ffedd5',
             borderRadius: '12px',
-            padding: '1.25rem',
+            padding: '1rem',
             color: '#9a3412',
-            fontSize: '0.95rem',
+            fontSize: '0.85rem',
             lineHeight: 1.5,
           }}
         >
-          <p style={{ margin: '0 0 0.75rem 0', fontWeight: 600, fontSize: '0.95rem' }}>
-            {dI18n.networkErrorSubtitle}
-          </p>
-
-          <div
-            style={{
-              background: '#ffffff',
-              borderRadius: '10px',
-              padding: '0.85rem 1.1rem',
-              border: '1px solid #fed7aa',
-              marginTop: '0.75rem',
-            }}
-          >
-            <div
-              style={{
-                fontSize: '0.85rem',
-                fontWeight: 700,
-                color: '#9a3412',
-                marginBottom: '0.4rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-              }}
-            >
-              <HelpCircle size={15} />
-              <span>{dI18n.networkTroubleshootTitle}:</span>
-            </div>
-            <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: '0.85rem', color: '#7c2d12', lineHeight: 1.6 }}>
-              <li>{dI18n.networkCheckWifi}</li>
-              <li>{dI18n.networkRetryPrompt}</li>
-            </ul>
-          </div>
-
-          {/* Collapsible Technical Details */}
-          {result.validation_warnings && result.validation_warnings.length > 0 && (
-            <div style={{ marginTop: '0.85rem' }}>
-              <button
-                type="button"
-                onClick={() => setShowTechDetails(!showTechDetails)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#c2410c',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  padding: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.3rem',
-                  textDecoration: 'underline',
-                }}
-              >
-                {showTechDetails ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                <span>{showTechDetails ? 'Hide' : 'Show'} {dI18n.technicalDetails}</span>
-              </button>
-
-              {showTechDetails && (
-                <div
-                  style={{
-                    marginTop: '0.5rem',
-                    background: '#fef2f2',
-                    border: '1px solid #fee2e2',
-                    borderRadius: '8px',
-                    padding: '0.75rem',
-                    fontFamily: 'monospace',
-                    fontSize: '0.78rem',
-                    color: '#991b1b',
-                    wordBreak: 'break-all',
-                  }}
-                >
-                  {result.validation_warnings.map((w, idx) => (
-                    <div key={idx}>{typeof w === 'string' ? w : w.issue}</div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+          <p style={{ margin: '0 0 0.5rem 0' }}>{dI18n.networkErrorSubtitle}</p>
+          <ul style={{ margin: 0, paddingLeft: '1.15rem', fontSize: '0.82rem', color: '#7c2d12', lineHeight: 1.5 }}>
+            <li>{dI18n.networkCheckWifi}</li>
+            <li>{dI18n.networkRetryPrompt}</li>
+          </ul>
         </div>
       </div>
     );
@@ -212,31 +143,32 @@ export const DiseaseResultCard: React.FC<DiseaseResultCardProps> = ({
 
     if (status === 'plantnet_authentication_error') {
       errorTitle = 'PlantNet Authentication Error';
-      errorMessage = 'PlantNet API authentication failed. Please verify the API key in the backend environment.';
+      errorMessage = 'PlantNet API authentication failed. Please verify the API key in backend.';
     } else if (status === 'plantnet_rate_limit_error') {
       errorTitle = 'PlantNet Rate Limit Reached';
-      errorMessage = 'PlantNet API rate limit exceeded. Please wait a moment and try again.';
+      errorMessage = 'PlantNet API rate limit reached. Please wait a moment and try again.';
     } else if (status === 'plantnet_timeout') {
       errorTitle = 'PlantNet Connection Timeout';
-      errorMessage = 'PlantNet identification service timed out. Please try again.';
+      errorMessage = 'PlantNet service timed out. Please try again.';
     }
 
     return (
       <div
+        className="responsive-card-pad"
         style={{
           background: '#ffffff',
           borderRadius: '16px',
           border: '1px solid #fecaca',
           boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
-          padding: '2rem',
           display: 'flex',
           flexDirection: 'column',
-          gap: '1.25rem',
+          gap: '1rem',
+          width: '100%',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#dc2626' }}>
-          <ServerCrash size={28} />
-          <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', color: '#dc2626' }}>
+          <ServerCrash size={24} style={{ flexShrink: 0 }} />
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0 }}>
             {errorTitle}
           </h3>
         </div>
@@ -246,20 +178,13 @@ export const DiseaseResultCard: React.FC<DiseaseResultCardProps> = ({
             background: '#fef2f2',
             border: '1px solid #fee2e2',
             borderRadius: '12px',
-            padding: '1.25rem',
+            padding: '1rem',
             color: '#991b1b',
-            fontSize: '0.95rem',
+            fontSize: '0.88rem',
             lineHeight: 1.5,
           }}
         >
           <strong>{errorMessage}</strong>
-          {result.validation_warnings && result.validation_warnings.length > 0 && (
-            <ul style={{ marginTop: '0.75rem', marginBottom: 0, paddingLeft: '1.25rem' }}>
-              {result.validation_warnings.map((w, idx) => (
-                <li key={idx}>{typeof w === 'string' ? w : w.issue}</li>
-              ))}
-            </ul>
-          )}
         </div>
       </div>
     );
@@ -269,21 +194,22 @@ export const DiseaseResultCard: React.FC<DiseaseResultCardProps> = ({
   if (isInsufficientEvidence || isNonPlant) {
     return (
       <div
+        className="responsive-card-pad"
         style={{
           background: '#ffffff',
           borderRadius: '16px',
           border: '1px solid #fed7aa',
           boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
-          padding: '2rem',
           display: 'flex',
           flexDirection: 'column',
-          gap: '1.25rem',
+          gap: '1rem',
+          width: '100%',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#c2410c' }}>
-          <AlertTriangle size={28} />
-          <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>
-            {isNonPlant ? 'Non-Plant Image Detected' : 'PlantNet Could Not Confidently Identify Plant'}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', color: '#c2410c' }}>
+          <AlertTriangle size={24} style={{ flexShrink: 0 }} />
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0 }}>
+            {isNonPlant ? 'Non-Plant Image Detected' : 'Could Not Confidently Identify Plant'}
           </h3>
         </div>
 
@@ -292,24 +218,17 @@ export const DiseaseResultCard: React.FC<DiseaseResultCardProps> = ({
             background: '#fff7ed',
             border: '1px solid #ffedd5',
             borderRadius: '12px',
-            padding: '1.25rem',
+            padding: '1rem',
             color: '#9a3412',
-            fontSize: '0.95rem',
+            fontSize: '0.88rem',
             lineHeight: 1.5,
           }}
         >
           <strong>
             {isNonPlant
-              ? 'Please upload a clear image of a crop leaf, fruit, flower, or foliage.'
-              : 'PlantNet could not identify this image confidently. Upload a clearer image showing the leaf, fruit, stem, or whole plant.'}
+              ? 'Please upload a clear, well-lit photo of a crop leaf, fruit, flower, or foliage.'
+              : 'Upload a clearer image showing the leaf, fruit, stem, or whole plant for confident diagnosis.'}
           </strong>
-          {result.validation_warnings && result.validation_warnings.length > 0 && (
-            <ul style={{ marginTop: '0.75rem', marginBottom: 0, paddingLeft: '1.25rem' }}>
-              {result.validation_warnings.map((w, idx) => (
-                <li key={idx}>{typeof w === 'string' ? w : w.issue}</li>
-              ))}
-            </ul>
-          )}
         </div>
       </div>
     );
@@ -335,23 +254,25 @@ export const DiseaseResultCard: React.FC<DiseaseResultCardProps> = ({
 
   return (
     <div
+      className="responsive-card-pad"
       style={{
         background: '#ffffff',
         borderRadius: '16px',
         border: '1px solid #e2e8f0',
         boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
-        padding: '2rem',
         display: 'flex',
         flexDirection: 'column',
-        gap: '1.5rem',
+        gap: '1rem',
+        width: '100%',
       }}
     >
-      {/* 1. TOP HERO SUMMARY GRID */}
+      {/* 1. TOP HERO SUMMARY GRID (Always visible on mobile) */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: '1rem',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))',
+          gap: '0.75rem',
+          width: '100%',
         }}
       >
         {/* Identified Plant */}
@@ -360,98 +281,93 @@ export const DiseaseResultCard: React.FC<DiseaseResultCardProps> = ({
             background: '#f0fdf4',
             border: '1px solid #bbf7d0',
             borderRadius: '12px',
-            padding: '1.25rem',
+            padding: '0.85rem 1rem',
             display: 'flex',
             flexDirection: 'column',
-            gap: '0.35rem',
+            gap: '0.25rem',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#166534', fontSize: '0.82rem', fontWeight: 700 }}>
-            <Leaf size={16} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#166534', fontSize: '0.75rem', fontWeight: 700 }}>
+            <Leaf size={14} />
             <span>Identified Crop</span>
           </div>
-          <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#14532d' }}>
+          <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#14532d' }} className="break-words">
             {cropName}
           </div>
           {scientificName && (
-            <div style={{ fontSize: '0.82rem', color: '#15803d', fontStyle: 'italic' }}>
+            <div style={{ fontSize: '0.75rem', color: '#15803d', fontStyle: 'italic' }} className="break-words">
               {scientificName}
             </div>
           )}
-          {familyName && (
-            <div style={{ fontSize: '0.75rem', color: '#166534' }}>
-              Family: {familyName}
-            </div>
-          )}
         </div>
 
-        {/* Botanical / Identification Score */}
-        <div
-          style={{
-            background: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            borderRadius: '12px',
-            padding: '1.25rem',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.5rem',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#475569', fontSize: '0.82rem', fontWeight: 700 }}>
-            <Sparkles size={16} />
-            <span>Identification Confidence</span>
-          </div>
-          <DiagnosisConfidence confidence={plantnetScore} scoreLabel="Identification score" />
-        </div>
-
-        {/* Health / Risk Status */}
+        {/* Health Status */}
         <div
           style={{
             background: isHealthy ? '#f0fdf4' : '#fff1f2',
             border: isHealthy ? '1px solid #bbf7d0' : '1px solid #fecdd3',
             borderRadius: '12px',
-            padding: '1.25rem',
+            padding: '0.85rem 1rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.25rem',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: isHealthy ? '#166534' : '#9f1239', fontSize: '0.75rem', fontWeight: 700 }}>
+            {isHealthy ? <ShieldCheck size={14} /> : <ShieldAlert size={14} />}
+            <span>Health Status</span>
+          </div>
+          <div style={{ fontSize: '1.15rem', fontWeight: 800, color: isHealthy ? '#15803d' : '#be123c' }}>
+            {isHealthy ? 'Healthy Plant' : 'Disease Detected'}
+          </div>
+          <div style={{ fontSize: '0.75rem', color: isHealthy ? '#166534' : '#9f1239', textTransform: 'capitalize' }}>
+            Risk Level: <strong>{riskLevel}</strong>
+          </div>
+        </div>
+
+        {/* Confidence */}
+        <div
+          style={{
+            background: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            borderRadius: '12px',
+            padding: '0.85rem 1rem',
             display: 'flex',
             flexDirection: 'column',
             gap: '0.35rem',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: isHealthy ? '#166534' : '#9f1239', fontSize: '0.82rem', fontWeight: 700 }}>
-            {isHealthy ? <ShieldCheck size={16} /> : <ShieldAlert size={16} />}
-            <span>Crop Health Status</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#475569', fontSize: '0.75rem', fontWeight: 700 }}>
+            <Sparkles size={14} />
+            <span>Diagnosis Confidence</span>
           </div>
-          <div style={{ fontSize: '1.25rem', fontWeight: 800, color: isHealthy ? '#15803d' : '#be123c' }}>
-            {isHealthy ? 'Healthy Foliage' : 'Disease Detected'}
-          </div>
-          <div style={{ fontSize: '0.8rem', color: isHealthy ? '#166534' : '#9f1239', textTransform: 'capitalize' }}>
-            Risk Level: <strong>{riskLevel}</strong>
-          </div>
+          <DiagnosisConfidence confidence={plantnetScore} scoreLabel="Confidence score" />
         </div>
 
-        {/* Selected Crop Match Status */}
+        {/* Crop Match Banner (if applicable) */}
         {selectedCrop && (
           <div
             style={{
               background: isMismatch ? '#fff1f2' : '#f0fdf4',
               border: isMismatch ? '1px solid #fecdd3' : '1px solid #bbf7d0',
               borderRadius: '12px',
-              padding: '1.25rem',
+              padding: '0.85rem 1rem',
               display: 'flex',
               flexDirection: 'column',
-              gap: '0.35rem',
+              gap: '0.25rem',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: isMismatch ? '#9f1239' : '#166534', fontSize: '0.82rem', fontWeight: 700 }}>
-              {isMismatch ? <XCircle size={16} /> : <CheckCircle2 size={16} />}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: isMismatch ? '#9f1239' : '#166534', fontSize: '0.75rem', fontWeight: 700 }}>
+              {isMismatch ? <XCircle size={14} /> : <CheckCircle2 size={14} />}
               <span>Crop Verification</span>
             </div>
-            <div style={{ fontSize: '1.15rem', fontWeight: 800, color: isMismatch ? '#be123c' : '#15803d' }}>
+            <div style={{ fontSize: '0.98rem', fontWeight: 800, color: isMismatch ? '#be123c' : '#15803d' }}>
               {isMismatch ? 'Selected Crop Mismatch' : 'Crop Match Confirmed'}
             </div>
-            <div style={{ fontSize: '0.78rem', color: isMismatch ? '#9f1239' : '#166534', lineHeight: 1.35 }}>
+            <div style={{ fontSize: '0.72rem', color: isMismatch ? '#9f1239' : '#166534', lineHeight: 1.3 }}>
               {isMismatch
-                ? `The selected crop '${selectedCrop}' may differ from identified crop '${cropName}'.`
-                : `Uploaded image matches selected crop '${selectedCrop}'.`}
+                ? `Selected: '${selectedCrop}' • Detected: '${cropName}'`
+                : `Matched selected '${selectedCrop}'.`}
             </div>
           </div>
         )}
@@ -461,172 +377,208 @@ export const DiseaseResultCard: React.FC<DiseaseResultCardProps> = ({
       <div
         style={{
           background: isHealthy ? '#f0fdf4' : '#fffbeb',
-          border: isHealthy ? '1px solid #86efac' : '1px solid #fde68a',
-          borderRadius: '12px',
-          padding: '1.5rem',
+          border: isHealthy ? '1.5px solid #86efac' : '1.5px solid #fde68a',
+          borderRadius: '14px',
+          padding: '1rem 1.15rem',
           display: 'flex',
-          flexDirection: 'column',
-          gap: '0.75rem',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '0.65rem',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            <Stethoscope size={24} color={isHealthy ? '#16a34a' : '#d97706'} />
-            <div>
-              <div style={{ fontSize: '0.82rem', fontWeight: 700, color: isHealthy ? '#166534' : '#92400e', textTransform: 'uppercase' }}>
-                Primary Pathology Diagnosis
-              </div>
-              <div style={{ fontSize: '1.45rem', fontWeight: 800, color: isHealthy ? '#14532d' : '#78350f' }}>
-                {diseaseName}
-              </div>
-            </div>
-          </div>
-          <span
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0, flex: 1 }}>
+          <div
             style={{
+              width: '38px',
+              height: '38px',
+              borderRadius: '50%',
               background: isHealthy ? '#dcfce7' : '#fef3c7',
-              color: isHealthy ? '#15803d' : '#92400e',
-              border: `1px solid ${isHealthy ? '#bbf7d0' : '#fde68a'}`,
-              borderRadius: '20px',
-              padding: '0.35rem 0.85rem',
-              fontWeight: 700,
-              fontSize: '0.82rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
             }}
           >
-            {isHealthy ? 'No Active Infection' : 'Action Required'}
-          </span>
+            <Stethoscope size={20} color={isHealthy ? '#16a34a' : '#d97706'} />
+          </div>
+          <div className="min-w-0" style={{ flex: 1 }}>
+            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: isHealthy ? '#166534' : '#92400e', textTransform: 'uppercase' }}>
+              Primary Diagnosis
+            </div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: isHealthy ? '#14532d' : '#78350f' }} className="break-words">
+              {diseaseName}
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* 3. SYMPTOMS & CAUSES SECTION */}
-      {(symptoms.length > 0 || causes.length > 0) && (
-        <div
+        <span
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: '1rem',
+            background: isHealthy ? '#dcfce7' : '#fef3c7',
+            color: isHealthy ? '#15803d' : '#92400e',
+            border: `1px solid ${isHealthy ? '#bbf7d0' : '#fde68a'}`,
+            borderRadius: '20px',
+            padding: '0.3rem 0.75rem',
+            fontWeight: 700,
+            fontSize: '0.78rem',
+            flexShrink: 0,
           }}
         >
-          {/* Visible Symptoms */}
-          {symptoms.length > 0 && (
-            <div
-              style={{
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: '12px',
-                padding: '1.25rem',
-              }}
-            >
-              <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.75rem 0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <Activity size={18} color="var(--primary)" />
-                Observed Symptoms
-              </h4>
-              <ul style={{ margin: 0, paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                {symptoms.map((sym, idx) => (
-                  <li key={idx} style={{ fontSize: '0.88rem', color: '#334155', lineHeight: 1.45 }}>
-                    {sym}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          {isHealthy ? 'No Active Infection' : 'Action Recommended'}
+        </span>
+      </div>
 
-          {/* Possible Causes */}
-          {causes.length > 0 && (
-            <div
-              style={{
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: '12px',
-                padding: '1.25rem',
-              }}
-            >
-              <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.75rem 0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <AlertTriangle size={18} color="#d97706" />
-                Underlying Causes & Pathogens
-              </h4>
-              <ul style={{ margin: 0, paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                {causes.map((cause, idx) => (
-                  <li key={idx} style={{ fontSize: '0.88rem', color: '#334155', lineHeight: 1.45 }}>
-                    {cause}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* 4. MANAGEMENT ACTIONS (WHAT TO DO) */}
+      {/* 3. MANAGEMENT ACTIONS (Highlighted / Expanded by default) */}
       {management.length > 0 && (
         <div
           style={{
             background: '#f0fdf4',
             border: '1px solid #bbf7d0',
-            borderRadius: '12px',
-            padding: '1.25rem 1.5rem',
+            borderRadius: '14px',
+            padding: '1rem 1.15rem',
           }}
         >
-          <h4 style={{ fontSize: '0.98rem', fontWeight: 800, color: '#166534', margin: '0 0 0.75rem 0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <Wrench size={18} color="#16a34a" />
-            Recommended Immediate Actions & Management
+          <h4 style={{ fontSize: '0.92rem', fontWeight: 800, color: '#166534', margin: '0 0 0.65rem 0', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+            <Wrench size={16} color="#16a34a" />
+            Recommended Immediate Actions & Treatment
           </h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
             {management.map((step, idx) => (
               <div
                 key={idx}
                 style={{
                   display: 'flex',
                   alignItems: 'flex-start',
-                  gap: '0.6rem',
+                  gap: '0.5rem',
                   background: '#ffffff',
-                  padding: '0.65rem 0.9rem',
+                  padding: '0.55rem 0.75rem',
                   borderRadius: '8px',
                   border: '1px solid #dcfce7',
-                  fontSize: '0.88rem',
+                  fontSize: '0.82rem',
                   color: '#14532d',
                   lineHeight: 1.45,
                 }}
               >
-                <CheckCheck size={18} color="#16a34a" style={{ flexShrink: 0, marginTop: '2px' }} />
-                <span>{step}</span>
+                <CheckCheck size={16} color="#16a34a" style={{ flexShrink: 0, marginTop: '2px' }} />
+                <span className="break-words">{step}</span>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* 5. PREVENTATIVE CARE */}
-      {prevention.length > 0 && (
-        <div
-          style={{
-            background: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            borderRadius: '12px',
-            padding: '1.25rem 1.5rem',
-          }}
-        >
-          <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.75rem 0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <ShieldCheck size={18} color="var(--primary)" />
-            Future Prevention & Field Hygiene
-          </h4>
-          <ul style={{ margin: 0, paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            {prevention.map((prev, idx) => (
-              <li key={idx} style={{ fontSize: '0.88rem', color: '#475569', lineHeight: 1.45 }}>
-                {prev}
-              </li>
-            ))}
-          </ul>
+      {/* 4. SYMPTOMS & CAUSES ACCORDION */}
+      {(symptoms.length > 0 || causes.length > 0) && (
+        <div className="accordion-card">
+          <button
+            type="button"
+            className="accordion-header-btn"
+            onClick={() => setSymptomsOpen(!symptomsOpen)}
+            aria-expanded={symptomsOpen}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontWeight: 700, fontSize: '0.88rem', color: '#0f172a' }}>
+              <Activity size={16} color="var(--primary)" />
+              <span>Visible Symptoms & Possible Causes ({symptoms.length + causes.length})</span>
+            </div>
+            {symptomsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </button>
+
+          {symptomsOpen && (
+            <div className="accordion-body-content" style={{ padding: '0.75rem 1rem 1rem 1rem' }}>
+              {symptoms.length > 0 && (
+                <div style={{ marginBottom: causes.length > 0 ? '0.75rem' : 0 }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '0.35rem' }}>Symptoms:</div>
+                  <ul style={{ margin: 0, paddingLeft: '1.15rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                    {symptoms.map((sym, idx) => (
+                      <li key={idx} style={{ fontSize: '0.82rem', color: '#334155', lineHeight: 1.4 }} className="break-words">
+                        {sym}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {causes.length > 0 && (
+                <div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '0.35rem' }}>Possible Causes:</div>
+                  <ul style={{ margin: 0, paddingLeft: '1.15rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                    {causes.map((cause, idx) => (
+                      <li key={idx} style={{ fontSize: '0.82rem', color: '#334155', lineHeight: 1.4 }} className="break-words">
+                        {cause}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
-      {/* 6. DISCLAIMER */}
+      {/* 5. PREVENTATIVE CARE ACCORDION */}
+      {prevention.length > 0 && (
+        <div className="accordion-card">
+          <button
+            type="button"
+            className="accordion-header-btn"
+            onClick={() => setPreventionOpen(!preventionOpen)}
+            aria-expanded={preventionOpen}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontWeight: 700, fontSize: '0.88rem', color: '#0f172a' }}>
+              <ShieldCheck size={16} color="var(--primary)" />
+              <span>Prevention & Field Hygiene Practices ({prevention.length})</span>
+            </div>
+            {preventionOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </button>
+
+          {preventionOpen && (
+            <div className="accordion-body-content" style={{ padding: '0.75rem 1rem 1rem 1rem' }}>
+              <ul style={{ margin: 0, paddingLeft: '1.15rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                {prevention.map((prev, idx) => (
+                  <li key={idx} style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.45 }} className="break-words">
+                    {prev}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 6. BOTANICAL & DIAGNOSTIC DETAILS ACCORDION */}
+      {(scientificName || familyName || result.plantnet_results) && (
+        <div className="accordion-card">
+          <button
+            type="button"
+            className="accordion-header-btn"
+            onClick={() => setBotanicalOpen(!botanicalOpen)}
+            aria-expanded={botanicalOpen}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontWeight: 700, fontSize: '0.88rem', color: '#0f172a' }}>
+              <Info size={16} color="#64748b" />
+              <span>Botanical Classification & Image Trace</span>
+            </div>
+            {botanicalOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </button>
+
+          {botanicalOpen && (
+            <div className="accordion-body-content" style={{ padding: '0.75rem 1rem 1rem 1rem', fontSize: '0.8rem', color: '#475569' }}>
+              {scientificName && <div><strong>Scientific Name:</strong> <em>{scientificName}</em></div>}
+              {familyName && <div style={{ marginTop: '0.25rem' }}><strong>Family:</strong> {familyName}</div>}
+              {plantnetScore != null && <div style={{ marginTop: '0.25rem' }}><strong>PlantNet Score:</strong> {(plantnetScore * 100).toFixed(1)}%</div>}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 7. DISCLAIMER */}
       <div
         style={{
           background: '#f8fafc',
           borderLeft: '4px solid #94a3b8',
-          padding: '0.85rem 1.15rem',
+          padding: '0.75rem 0.95rem',
           borderRadius: '8px',
-          fontSize: '0.78rem',
+          fontSize: '0.75rem',
           color: '#64748b',
           lineHeight: 1.45,
         }}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -12,8 +12,9 @@ import {
   Filler
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
-import { TrendingUp, BarChart2, Filter, ArrowRightLeft, CheckCircle, AlertCircle, Database, Calendar, ShieldCheck } from 'lucide-react';
+import { TrendingUp, BarChart2, Filter, ArrowRightLeft, CheckCircle, AlertCircle, Database, Calendar, ArrowUpDown, Clock } from 'lucide-react';
 import type { Language } from '../i18n/translations';
+import { translations } from '../i18n/translations';
 import { getLocalizedCommodityName, getLocalizedMarketName, getLocalizedDistrictName } from '../utils/i18nData';
 import {
   fetchRecentCommodities,
@@ -44,6 +45,7 @@ interface Props {
 }
 
 export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
+  const t = translations[language] || translations.en;
   const [commodities, setCommodities] = useState<RecentCommodity[]>([]);
   const [selectedCommodity, setSelectedCommodity] = useState<string>('Tomato');
   
@@ -57,11 +59,12 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
   const [comparisonMarkets, setComparisonMarkets] = useState<CompareMarketItem[]>([]);
   const [excludedMarkets, setExcludedMarkets] = useState<ExcludedMarketItem[]>([]);
   const [maxAgeDays, setMaxAgeDays] = useState<number>(30);
+  const [sortBy, setSortBy] = useState<'price_desc' | 'price_asc' | 'freshness' | 'alphabetical'>('price_desc');
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load available recent commodities (strictly with >= 1 official record in last 30 days)
+  // Load available recent commodities
   useEffect(() => {
     loadRecentCommodities();
   }, []);
@@ -150,25 +153,6 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
     }
   };
 
-  const handleAgeDaysChange = async (days: number) => {
-    setMaxAgeDays(days);
-    if (selectedCommodity) {
-      try {
-        const compRes = await fetchPriceComparison({
-          commodity: selectedCommodity,
-          max_age_days: days,
-          force_refresh: false
-        });
-        if (compRes) {
-          setComparisonMarkets(compRes.markets || []);
-          setExcludedMarkets(compRes.excluded_markets || []);
-        }
-      } catch (err) {
-        console.error('Error updating age filter', err);
-      }
-    }
-  };
-
   const handleCommodityChange = async (cropName: string) => {
     setSelectedCommodity(cropName);
     await loadRecentMarketsForCrop(cropName);
@@ -176,21 +160,34 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
 
   const handlePrimaryMarketChange = async (m1Name: string) => {
     setPrimaryMarket(m1Name);
-    await fetchAllData(selectedCommodity, m1Name, compareMarket);
+    if (m1Name === compareMarket) {
+      const remaining = markets.filter(m => m.canonical_name !== m1Name);
+      const newM2 = remaining.length > 0 ? remaining[0].canonical_name : '';
+      setCompareMarket(newM2);
+      await fetchAllData(selectedCommodity, m1Name, newM2, maxAgeDays);
+    } else {
+      await fetchAllData(selectedCommodity, m1Name, compareMarket, maxAgeDays);
+    }
   };
 
   const handleCompareMarketChange = async (m2Name: string) => {
     setCompareMarket(m2Name);
-    await fetchAllData(selectedCommodity, primaryMarket, m2Name);
+    await fetchAllData(selectedCommodity, primaryMarket, m2Name, maxAgeDays);
   };
 
-  // Build continuous time series across the union of observed dates
-  const dates1 = (primaryTrends || []).map(t => t.date);
-  const dates2 = (compareTrends || []).map(t => t.date);
-  const allDatesSet = Array.from(new Set([...dates1, ...dates2])).sort();
+  const handleAgeDaysChange = async (days: number) => {
+    setMaxAgeDays(days);
+    await fetchAllData(selectedCommodity, primaryMarket, compareMarket, days);
+  };
 
-  const p1Map = new Map(primaryTrends.map(t => [t.date, t]));
-  const p2Map = new Map(compareTrends.map(t => [t.date, t]));
+  // Build Unified Date Labels across both markets
+  const allDatesSet = Array.from(new Set([
+    ...primaryTrends.map(p => p.date),
+    ...compareTrends.map(p => p.date)
+  ])).sort();
+
+  const p1Map = new Map(primaryTrends.map(p => [p.date, p]));
+  const p2Map = new Map(compareTrends.map(p => [p.date, p]));
 
   const chartData1 = allDatesSet.map(d => p1Map.get(d)?.modal_price ?? null);
   const chartData2 = allDatesSet.map(d => p2Map.get(d)?.modal_price ?? null);
@@ -220,7 +217,7 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
         backgroundColor: 'rgba(16, 185, 129, 0.15)',
         tension: 0.25,
         fill: false,
-        pointRadius: 4,
+        pointRadius: 3.5,
         pointHoverRadius: 6,
         pointBackgroundColor: '#10b981',
         borderWidth: 2.5,
@@ -233,7 +230,7 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
         backgroundColor: 'rgba(59, 130, 246, 0.15)',
         tension: 0.25,
         fill: false,
-        pointRadius: 4,
+        pointRadius: 3.5,
         pointHoverRadius: 6,
         pointBackgroundColor: '#3b82f6',
         borderWidth: 2.5,
@@ -248,7 +245,7 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
     plugins: {
       legend: {
         position: 'top' as const,
-        labels: { color: '#334155', font: { family: 'Plus Jakarta Sans', weight: 700, size: 12 } }
+        labels: { color: '#334155', font: { family: 'Plus Jakarta Sans', weight: 700, size: 11 } }
       },
       tooltip: {
         mode: 'index' as const,
@@ -257,7 +254,7 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
           title: (items: any) => {
             if (items && items[0]) {
               const idx = items[0].dataIndex;
-              return allDatesSet[idx] ? `Observation Date: ${allDatesSet[idx]}` : items[0].label;
+              return allDatesSet[idx] ? `Date: ${allDatesSet[idx]}` : items[0].label;
             }
             return '';
           },
@@ -267,7 +264,7 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
             const isP1 = context.datasetIndex === 0;
             const dateStr = allDatesSet[context.dataIndex];
             const pt = isP1 ? p1Map.get(dateStr) : p2Map.get(dateStr);
-            const srcLabel = pt ? pt.source_label : 'Official Data';
+            const srcLabel = pt ? pt.source_label : 'Official';
             return `${context.dataset.label.split(' (')[0]}: ₹${val.toLocaleString('en-IN')}/qtl [${srcLabel}]`;
           }
         }
@@ -275,31 +272,48 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
     },
     scales: {
       x: {
-        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+        grid: { color: 'rgba(0, 0, 0, 0.04)' },
         ticks: {
           color: '#64748b',
-          maxRotation: 45,
-          minRotation: 0,
+          maxRotation: 0,
           autoSkip: true,
-          maxTicksLimit: 15,
-          font: { size: 11, weight: 600 }
+          maxTicksLimit: 7,
+          font: { size: 10, weight: 600 }
         }
       },
       y: {
-        grid: { color: 'rgba(0, 0, 0, 0.05)' },
-        ticks: { color: '#64748b' },
-        title: { display: true, text: 'Official Modal Price (₹ per quintal)', color: '#475569', font: { weight: 700 } }
+        grid: { color: 'rgba(0, 0, 0, 0.04)' },
+        ticks: { color: '#64748b', font: { size: 10 } },
+        title: { display: false }
       }
     }
   };
 
+  // Sort comparison markets
+  const sortedComparisonMarkets = useMemo(() => {
+    const list = [...comparisonMarkets];
+    if (sortBy === 'price_desc') {
+      return list.sort((a, b) => (b.modal_price || 0) - (a.modal_price || 0));
+    }
+    if (sortBy === 'price_asc') {
+      return list.sort((a, b) => (a.modal_price || 0) - (b.modal_price || 0));
+    }
+    if (sortBy === 'freshness') {
+      return list.sort((a, b) => (a.data_age_days || 0) - (b.data_age_days || 0));
+    }
+    if (sortBy === 'alphabetical') {
+      return list.sort((a, b) => a.market.localeCompare(b.market));
+    }
+    return list;
+  }, [comparisonMarkets, sortBy]);
+
   const barChartData = {
-    labels: comparisonMarkets.map(c => getLocalizedMarketName(c.market, language)),
+    labels: sortedComparisonMarkets.slice(0, 8).map(c => getLocalizedMarketName(c.market, language)),
     datasets: [
       {
-        label: 'Latest Official Modal Price (₹/qtl)',
-        data: comparisonMarkets.map(c => c.modal_price),
-        backgroundColor: comparisonMarkets.map(c =>
+        label: 'Latest Modal Price (₹/qtl)',
+        data: sortedComparisonMarkets.slice(0, 8).map(c => c.modal_price),
+        backgroundColor: sortedComparisonMarkets.slice(0, 8).map(c =>
           c.market === primaryMarket ? '#10b981' :
           c.market === compareMarket ? '#3b82f6' : '#94a3b8'
         ),
@@ -318,22 +332,24 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
   const p2Latest = compareTrends.length > 0 ? compareTrends[compareTrends.length - 1] : null;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%' }}>
       
       {/* Selector Control Panel */}
-      <div className="glass-panel responsive-card-pad" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 700 }}>
-          <Filter size={18} />
-          <span>Official Data Filters:</span>
+      <div className="glass-panel responsive-card-pad" style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', color: 'var(--primary)', fontWeight: 700, fontSize: '0.92rem' }}>
+          <Filter size={16} />
+          <span>{language === 'te' ? 'అధికారిక ఫిల్టర్లు' : (language === 'hi' ? 'आधिकारिक फ़िल्टर' : (language === 'ta' ? 'அதிகாரப்பூர்வ வடிகட்டிகள்' : (language === 'ml' ? 'ഔദ്യോഗിക ഫിൽട്ടറുകൾ' : 'Official Data Filters')))}</span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', width: '100%' }}>
+        {/* Filters: Vertical stack on mobile, 3-col on desktop */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '0.85rem', width: '100%' }}>
           {/* Select Commodity */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>Crop / Commodity</label>
+            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+              {t.common?.selectCrop || 'Crop / Commodity'}
+            </label>
             <select
               className="form-select"
-              style={{ width: '100%' }}
               value={selectedCommodity}
               onChange={(e) => handleCommodityChange(e.target.value)}
               disabled={loading || commodities.length === 0}
@@ -348,16 +364,18 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
 
           {/* Primary Market */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#059669' }}>Primary Market</label>
+            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: '#059669' }}>
+              {language === 'te' ? 'ప్రాథమిక మండి' : (language === 'hi' ? 'प्राथमिक मंडी' : (language === 'ta' ? 'முதன்மை மண்டி' : (language === 'ml' ? 'പ്രധാന വിപണി' : 'Primary Market')))}
+            </label>
             <select
               className="form-select"
-              style={{ width: '100%', borderColor: '#10b981' }}
+              style={{ borderColor: '#10b981' }}
               value={primaryMarket}
               onChange={(e) => handlePrimaryMarketChange(e.target.value)}
               disabled={loading || markets.length === 0}
             >
               {markets.length === 0 ? (
-                <option value="">No markets with recent data</option>
+                <option value="">{language === 'te' ? 'తాజా డేటా లేదు' : (language === 'hi' ? 'कोई हालिया डेटा नहीं' : (language === 'ta' ? 'சமீபத்திய தரவு இல்லை' : (language === 'ml' ? 'ഡാറ്റ ലഭ്യമല്ല' : 'No markets with recent data')))}</option>
               ) : (
                 markets.map(m => (
                   <option key={m.canonical_name} value={m.canonical_name}>
@@ -370,15 +388,19 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
 
           {/* Compare Market */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#2563eb' }}>Compare Market (Optional)</label>
+            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: '#2563eb' }}>
+              {language === 'te' ? 'పోలిక కోసం మండి (ఐచ్ఛికం)' : (language === 'hi' ? 'तुलना के लिए मंडी (वैकल्पिक)' : (language === 'ta' ? 'ஒப்பீட்டு மண்டி (விருப்பத்தேர்வு)' : (language === 'ml' ? 'താരതമ്യ വിപണി (ഓപ്ഷണൽ)' : 'Compare Market (Optional)')))}
+            </label>
             <select
               className="form-select"
-              style={{ width: '100%', borderColor: '#3b82f6' }}
+              style={{ borderColor: '#3b82f6' }}
               value={compareMarket}
               onChange={(e) => handleCompareMarketChange(e.target.value)}
               disabled={loading || markets.length < 2}
             >
-              <option value="">-- None (Single Market) --</option>
+              <option value="">
+                {language === 'te' ? '-- ఒక్కటే మండి (పోలిక లేదు) --' : (language === 'hi' ? '-- एकल मंडी (कोई तुलना नहीं) --' : (language === 'ta' ? '-- ஒற்றை மண்டி (ஒப்பீடு இல்லை) --' : (language === 'ml' ? '-- ഒറ്റ വിപണി (താരതമ്യമില്ല) --' : '-- None (Single Market) --')))}
+              </option>
               {markets
                 .filter(m => m.canonical_name !== primaryMarket)
                 .map(m => (
@@ -393,8 +415,8 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
       </div>
 
       {error && (
-        <div style={{ padding: '1rem', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid #f87171', borderRadius: '8px', color: '#b91c1c', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <AlertCircle size={18} />
+        <div style={{ padding: '0.85rem 1rem', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid #f87171', borderRadius: '10px', color: '#b91c1c', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }} role="alert">
+          <AlertCircle size={18} style={{ flexShrink: 0 }} />
           <span>{error}</span>
         </div>
       )}
@@ -402,48 +424,49 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
       {/* Comparison Summary Card (If 2 markets selected) */}
       {compareMarket && p1Latest && p2Latest && (
         <div
+          className="responsive-card-pad"
           style={{
-            padding: '1.25rem 1.5rem',
-            borderRadius: '12px',
+            borderRadius: '16px',
             background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(59, 130, 246, 0.08) 100%)',
             border: '1px solid rgba(59, 130, 246, 0.2)',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '1rem',
+            flexDirection: 'column',
+            gap: '0.75rem',
+            width: '100%',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <ArrowRightLeft size={24} color="#2563eb" />
-            <div>
-              <h4 style={{ margin: 0, fontWeight: 800, fontSize: '1rem', color: 'var(--primary-dark)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <ArrowRightLeft size={20} color="#2563eb" style={{ flexShrink: 0 }} />
+            <div className="min-w-0">
+              <h4 style={{ margin: 0, fontWeight: 800, fontSize: '0.95rem', color: 'var(--primary-dark)' }} className="break-words">
                 {getLocalizedMarketName(primaryMarket, language)} vs {getLocalizedMarketName(compareMarket, language)}
               </h4>
-              <p style={{ margin: '0.1rem 0 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                Latest Official Mandi Price Comparison for {getLocalizedCommodityName(selectedCommodity, language)}
+              <p style={{ margin: '0.1rem 0 0 0', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                {getLocalizedCommodityName(selectedCommodity, language)} {language === 'te' ? 'ధరల పోలిక' : 'Mandi Comparison'}
               </p>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', alignItems: 'center' }}>
-            <div>
-              <span style={{ fontSize: '0.75rem', color: '#059669', fontWeight: 700, display: 'block' }}>{getLocalizedMarketName(primaryMarket, language)}</span>
-              <span style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--primary-dark)' }}>₹{p1Latest.modal_price} / qtl</span>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Observed: {p1Latest.date} ({p1Latest.data_age_days}d ago)</span>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '0.65rem' }}>
+            <div style={{ background: '#ffffff', padding: '0.6rem 0.75rem', borderRadius: '10px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+              <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 700, display: 'block' }}>{getLocalizedMarketName(primaryMarket, language)}</span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary-dark)' }}>₹{p1Latest.modal_price} / qtl</span>
+              <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>{p1Latest.date} ({p1Latest.data_age_days}d ago)</span>
             </div>
 
-            <div>
-              <span style={{ fontSize: '0.75rem', color: '#2563eb', fontWeight: 700, display: 'block' }}>{getLocalizedMarketName(compareMarket, language)}</span>
-              <span style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--primary-dark)' }}>₹{p2Latest.modal_price} / qtl</span>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Observed: {p2Latest.date} ({p2Latest.data_age_days}d ago)</span>
+            <div style={{ background: '#ffffff', padding: '0.6rem 0.75rem', borderRadius: '10px', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
+              <span style={{ fontSize: '0.72rem', color: '#2563eb', fontWeight: 700, display: 'block' }}>{getLocalizedMarketName(compareMarket, language)}</span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary-dark)' }}>₹{p2Latest.modal_price} / qtl</span>
+              <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>{p2Latest.date} ({p2Latest.data_age_days}d ago)</span>
             </div>
 
-            <div style={{ borderLeft: '2px solid #cbd5e1', paddingLeft: '1.25rem' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, display: 'block' }}>Higher Realized Mandi</span>
-              <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#059669', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                <CheckCircle size={16} />
-                {p1Latest.modal_price >= p2Latest.modal_price ? getLocalizedMarketName(primaryMarket, language) : getLocalizedMarketName(compareMarket, language)} (+₹{Math.abs(p1Latest.modal_price - p2Latest.modal_price)}/qtl)
+            <div style={{ background: '#ffffff', padding: '0.6rem 0.75rem', borderRadius: '10px', border: '1px solid #cbd5e1' }}>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, display: 'block' }}>
+                {language === 'te' ? 'అధిక ధర లభించిన మండి' : (language === 'hi' ? 'अधिक भाव वाली मंडी' : (language === 'ta' ? 'அதிக விலை கிடைத்த மண்டி' : (language === 'ml' ? 'കൂടുതൽ വില ലഭിച്ച വിപണി' : 'Higher Realized Mandi')))}
+              </span>
+              <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#059669', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                <CheckCircle size={14} />
+                {p1Latest.modal_price >= p2Latest.modal_price ? getLocalizedMarketName(primaryMarket, language) : getLocalizedMarketName(compareMarket, language)} (+₹{Math.abs(p1Latest.modal_price - p2Latest.modal_price)})
               </span>
             </div>
           </div>
@@ -451,36 +474,36 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
       )}
 
       {/* Historical 30-Day Trends Chart */}
-      <div className="glass-panel responsive-card-pad">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.85rem', marginBottom: '1.25rem' }}>
+      <div className="glass-panel responsive-card-pad" style={{ width: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.65rem', marginBottom: '1rem' }}>
           <div>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-              <TrendingUp size={20} color="var(--primary)" />
-              {language === 'te' ? '30 రోజుల మార్కెట్ ధరల ట్రెండ్స్' : 'Historical Price Trends'}
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.45rem', margin: 0 }}>
+              <TrendingUp size={18} color="var(--primary)" />
+              {t.trends?.title || 'Historical Price Trends'}
             </h3>
-            <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
-              Showing official observed mandi prices from the last 30 days.
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+              {t.trends?.subtitle || 'Official observed APMC mandi prices from the last 30 days.'}
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
             {p1Latest && (
-              <span className={`badge ${getSourceBadgeClass(p1Latest.price_source)}`} style={{ fontSize: '0.72rem' }}>
-                <Database size={12} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
-                {p1Latest.source_label} (Latest: {p1Latest.date})
+              <span className={`badge ${getSourceBadgeClass(p1Latest.price_source)}`} style={{ fontSize: '0.68rem' }}>
+                <Database size={11} style={{ marginRight: '3px', verticalAlign: 'middle' }} />
+                {p1Latest.source_label} ({p1Latest.date})
               </span>
             )}
           </div>
         </div>
 
         {primaryTrends.length < 2 ? (
-          <div style={{ height: '220px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1', color: '#64748b', textAlign: 'center', padding: '1.25rem' }}>
-            <Calendar size={28} color="#94a3b8" style={{ marginBottom: '0.5rem' }} />
-            <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>
-              Not enough recent official mandi-price data is available to display a trend.
+          <div style={{ height: '200px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', borderRadius: '12px', border: '1px dashed #cbd5e1', color: '#64748b', textAlign: 'center', padding: '1rem' }}>
+            <Calendar size={24} color="#94a3b8" style={{ marginBottom: '0.35rem' }} />
+            <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>
+              {t.trends?.noRecentData || 'Not enough recent official mandi data is available to display a trend.'}
             </span>
-            <span style={{ fontSize: '0.78rem', marginTop: '0.25rem' }}>
-              Only valid observed APMC records from the last 30 days are displayed.
+            <span style={{ fontSize: '0.75rem', marginTop: '0.2rem' }}>
+              {t.trends?.officialOnly || 'Only valid observed APMC records from the last 30 days are displayed.'}
             </span>
           </div>
         ) : (
@@ -490,32 +513,33 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
         )}
       </div>
 
-      {/* Cross Market Comparison Grid & Table */}
-      <div className="glass-panel responsive-card-pad">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
+      {/* Cross Market Comparison Grid & Stacked Cards */}
+      <div className="glass-panel responsive-card-pad" style={{ width: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
           <div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-              <BarChart2 size={20} color="#60a5fa" />
-              Market Comparison Overview
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.45rem', margin: 0 }}>
+              <BarChart2 size={18} color="#60a5fa" />
+              {t.comparison?.title || 'Market Comparison Overview'}
             </h3>
-            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
-              Showing only markets with valid official observations within the last {maxAgeDays} days.
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+              {language === 'te' ? `గత ${maxAgeDays} రోజుల్లో అధికారిక లావాదేవీలు నమోదైన మార్కెట్లు.` : (language === 'hi' ? `पिछले ${maxAgeDays} दिनों में लेनदेन दर्ज मंडियों का विवरण।` : (language === 'ta' ? `கடந்த ${maxAgeDays} நாட்களில் பதிவு செய்யப்பட்ட மண்டிகள்.` : (language === 'ml' ? `കഴിഞ്ഞ ${maxAgeDays} ദിവസങ്ങളിലെ വിപണി നിരീക്ഷണങ്ങൾ.` : `Showing markets with official observations within ${maxAgeDays} days.`)))}
             </div>
           </div>
 
-          {/* Time Window Selector & Qualification Badge */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <div style={{ display: 'inline-flex', background: '#f1f5f9', padding: '0.25rem', borderRadius: '8px', gap: '0.2rem', border: '1px solid #e2e8f0' }}>
+          {/* Time Window & Sort Controls */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            {/* Freshness pills */}
+            <div style={{ display: 'inline-flex', background: '#f1f5f9', padding: '0.2rem', borderRadius: '8px', gap: '0.2rem', border: '1px solid #e2e8f0' }}>
               {[30, 60].map((days) => (
                 <button
                   key={days}
                   type="button"
                   onClick={() => handleAgeDaysChange(days)}
                   style={{
-                    padding: '0.3rem 0.65rem',
+                    padding: '0.25rem 0.55rem',
                     borderRadius: '6px',
                     border: 'none',
-                    fontSize: '0.78rem',
+                    fontSize: '0.75rem',
                     fontWeight: 700,
                     cursor: 'pointer',
                     background: maxAgeDays === days ? '#059669' : 'transparent',
@@ -529,17 +553,36 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
               ))}
             </div>
 
-            <span className={comparisonMarkets.length > 0 ? "badge badge-green" : "badge badge-amber"} style={{ fontSize: '0.75rem' }}>
-              <ShieldCheck size={12} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
-              {comparisonMarkets.length} Mandis Qualified (Age ≤ {maxAgeDays}d)
-            </span>
+            {/* Sort Dropdown */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '0.25rem 0.5rem' }}>
+              <ArrowUpDown size={12} color="#64748b" />
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                style={{
+                  border: 'none',
+                  background: 'transparent',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  color: '#334155',
+                  outline: 'none',
+                  cursor: 'pointer',
+                }}
+                aria-label="Sort comparison markets"
+              >
+                <option value="price_desc">{language === 'te' ? 'అత్యధిక ధర' : (language === 'hi' ? 'उच्चतम भाव' : (language === 'ta' ? 'அதிகபட்ச விலை' : (language === 'ml' ? 'ഏറ്റവും ഉയർന്ന വില' : 'Highest Price')))}</option>
+                <option value="price_asc">{language === 'te' ? 'అత్యల్ప ధర' : (language === 'hi' ? 'न्यूनतम भाव' : (language === 'ta' ? 'குறைந்த விலை' : (language === 'ml' ? 'ഏറ്റവും കുറഞ്ഞ വില' : 'Lowest Price')))}</option>
+                <option value="freshness">{language === 'te' ? 'తాజా డేటా' : (language === 'hi' ? 'नवीनतम डेटा' : (language === 'ta' ? 'சமீபத்திய தரவு' : (language === 'ml' ? 'പുതിയ ഡാറ്റ' : 'Freshest First')))}</option>
+                <option value="alphabetical">{language === 'te' ? 'మార్కెట్ పేరు' : (language === 'hi' ? 'मंडी का नाम' : (language === 'ta' ? 'மண்டி பெயர்' : (language === 'ml' ? 'വിപണി നാമം' : 'Market Name')))}</option>
+              </select>
+            </div>
           </div>
         </div>
 
         {comparisonMarkets.length === 0 ? (
           <div
             style={{
-              padding: '2.5rem 1.5rem',
+              padding: '2rem 1rem',
               textAlign: 'center',
               background: '#f8fafc',
               borderRadius: '12px',
@@ -547,43 +590,33 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '0.75rem',
-              margin: '1rem 0'
+              gap: '0.65rem',
+              margin: '0.75rem 0'
             }}
           >
-            <AlertCircle size={36} color="#f59e0b" />
-            <div style={{ fontWeight: 700, color: '#1e293b', fontSize: '1.05rem' }}>
-              No official mandi observations found within the last {maxAgeDays} days.
+            <AlertCircle size={30} color="#f59e0b" />
+            <div style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.95rem' }}>
+              {language === 'te' ? `గత ${maxAgeDays} రోజుల్లో అధికారిక మండి పరిశీలనలు కనుగొనబడలేదు.` : (language === 'hi' ? `पिछले ${maxAgeDays} दिनों में कोई आधिकारिक मंडी रिकॉर्ड नहीं मिला।` : (language === 'ta' ? `கடந்த ${maxAgeDays} நாட்களில் அதிகாரப்பூர்வ பதிவுகள் எதுவும் கிடைக்கவில்லை.` : (language === 'ml' ? `കഴിഞ്ഞ ${maxAgeDays} ദിവസങ്ങളിൽ ഔദ്യോഗിക രേഖകൾ ഒന്നും ലഭ്യമല്ല.` : `No official mandi observations found within the last ${maxAgeDays} days.`)))}
             </div>
-            <p style={{ margin: 0, fontSize: '0.88rem', color: '#64748b', maxWidth: '540px', lineHeight: 1.5 }}>
-              Official records for {getLocalizedCommodityName(selectedCommodity, language)} can be viewed across the 30-day or 60-day window.
+            <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b', maxWidth: '480px', lineHeight: 1.45 }}>
+              {language === 'te' ? 'అందుబాటులో ఉన్న రికార్డులను చూడటానికి సమయ పరిధిని 60 రోజులకు పెంచండి.' : (language === 'hi' ? 'उपलब्ध रिकॉर्ड देखने के लिए समय सीमा को 60 दिनों तक बढ़ाएं।' : (language === 'ta' ? 'கிடைக்கக்கூடிய பதிவுகளைக் காண கால வரம்பை 60 நாட்களுக்கு விரிவாக்குங்கள்.' : (language === 'ml' ? 'ലഭ്യമായ രേഖകൾ കാണാൻ സമയപരിധി 60 ദിവസമായി മാറ്റുക.' : 'Try expanding the freshness window to 60 days to view available records.')))}
             </p>
             {maxAgeDays === 30 && (
               <button
                 type="button"
                 onClick={() => handleAgeDaysChange(60)}
-                style={{
-                  marginTop: '0.5rem',
-                  padding: '0.55rem 1.25rem',
-                  borderRadius: '8px',
-                  background: '#059669',
-                  color: '#ffffff',
-                  border: 'none',
-                  fontWeight: 700,
-                  fontSize: '0.88rem',
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 8px rgba(5, 150, 105, 0.25)'
-                }}
+                className="btn-primary"
+                style={{ marginTop: '0.35rem', fontSize: '0.82rem', padding: '0.5rem 1rem', minHeight: '40px' }}
               >
-                Expand Freshness Window to 60 Days
+                {language === 'te' ? 'సమయ పరిధిని 60 రోజులకు పెంచండి' : (language === 'hi' ? 'अवधि 60 दिन तक बढ़ाएं' : (language === 'ta' ? 'கால வரம்பை 60 நாட்களாக விரிவுபடுத்து' : (language === 'ml' ? 'കാലയളവ് 60 ദിവസമായി മാറ്റുക' : 'Expand Freshness Window to 60 Days')))}
               </button>
             )}
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%' }}>
             
             {/* Bar Chart Overview */}
-            <div style={{ height: '300px' }}>
+            <div style={{ height: '240px', width: '100%' }}>
               <Bar
                 data={barChartData}
                 options={{
@@ -591,29 +624,78 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
                   maintainAspectRatio: false,
                   plugins: { legend: { display: false } },
                   scales: {
-                    x: { ticks: { color: '#64748b', font: { size: 10 } } },
-                    y: { ticks: { color: '#64748b' }, title: { display: true, text: 'Modal Price (₹/qtl)' } }
+                    x: { ticks: { color: '#64748b', font: { size: 9 }, maxRotation: 35, autoSkip: true } },
+                    y: { ticks: { color: '#64748b', font: { size: 9 } } }
                   }
                 }}
               />
             </div>
 
-            {/* Qualified Markets Table */}
-            <div style={{ overflowX: 'auto' }}>
+            {/* Mobile View: Stacked Comparison Cards (< 1024px) */}
+            <div className="mobile-only" style={{ flexDirection: 'column', gap: '0.65rem', width: '100%' }}>
+              {sortedComparisonMarkets.map((c) => (
+                <div
+                  key={c.market}
+                  style={{
+                    background: c.market === primaryMarket ? 'rgba(16, 185, 129, 0.06)' : c.market === compareMarket ? 'rgba(59, 130, 246, 0.06)' : '#ffffff',
+                    border: c.market === primaryMarket ? '1.5px solid #10b981' : c.market === compareMarket ? '1.5px solid #3b82f6' : '1px solid #e2e8f0',
+                    borderRadius: '12px',
+                    padding: '0.85rem 1rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.45rem',
+                    width: '100%',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
+                    <div className="min-w-0">
+                      <div style={{ fontWeight: 800, fontSize: '0.92rem', color: '#0f172a' }} className="break-words">
+                        {getLocalizedMarketName(c.market, language)}
+                        {c.market === primaryMarket && <span style={{ marginLeft: '0.35rem', fontSize: '0.68rem', color: '#059669', fontWeight: 800 }}>(M1)</span>}
+                        {c.market === compareMarket && <span style={{ marginLeft: '0.35rem', fontSize: '0.68rem', color: '#2563eb', fontWeight: 800 }}>(M2)</span>}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                        {getLocalizedDistrictName(c.district, language)}
+                      </div>
+                    </div>
+
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--primary-dark)', lineHeight: 1 }}>
+                        ₹{c.modal_price}
+                      </div>
+                      <span style={{ fontSize: '0.68rem', color: '#64748b' }}>/ quintal</span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.35rem', fontSize: '0.74rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.45rem', marginTop: '0.2rem' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>
+                      Range: ₹{c.min_price} - ₹{c.max_price}
+                    </span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: c.data_age_days === 0 ? '#059669' : '#64748b', fontWeight: 600 }}>
+                      <Clock size={11} />
+                      {c.data_age_days === 0 ? 'Today' : `${c.data_age_days}d ago`} ({c.observation_date})
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop View: Full Table (>= 1024px) */}
+            <div className="desktop-only" style={{ overflowX: 'auto', width: '100%' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)', textAlign: 'left' }}>
-                    <th style={{ padding: '0.6rem' }}>{language === 'te' ? 'మార్కెట్' : language === 'hi' ? 'मंडी' : language === 'ml' ? 'മാർക്കറ്റ്' : language === 'ta' ? 'மண்டி' : 'Market'}</th>
-                    <th style={{ padding: '0.6rem' }}>{language === 'te' ? 'జిల్లా' : language === 'hi' ? 'ज़िला' : language === 'ml' ? 'ജില്ല' : language === 'ta' ? 'மாவட்டம்' : 'District'}</th>
-                    <th style={{ padding: '0.6rem' }}>{language === 'te' ? 'మోడల్ ధర' : language === 'hi' ? 'मॉडल मूल्य' : language === 'ml' ? 'മോഡൽ വില' : language === 'ta' ? 'மாதிரி விலை' : 'Modal Price'}</th>
-                    <th style={{ padding: '0.6rem' }}>{language === 'te' ? 'కనిష్ట - గరిష్ట' : language === 'hi' ? 'न्यूनतम - अधिकतम' : language === 'ml' ? 'കുറഞ്ഞ - കൂടിയ' : language === 'ta' ? 'குறைந்த - அதிக' : 'Min - Max'}</th>
-                    <th style={{ padding: '0.6rem' }}>{language === 'te' ? 'రాబడులు' : language === 'hi' ? 'आवक' : language === 'ml' ? 'വരവ്' : language === 'ta' ? 'வரத்து' : 'Arrivals'}</th>
-                    <th style={{ padding: '0.6rem' }}>{language === 'te' ? 'తేదీ' : language === 'hi' ? 'तारीख' : language === 'ml' ? 'തീയതി' : language === 'ta' ? 'தேதி' : 'Observed Date'}</th>
-                    <th style={{ padding: '0.6rem' }}>{language === 'te' ? 'డేటా వయస్సు' : language === 'hi' ? 'डेटा आयु' : language === 'ml' ? 'കാലപ്പഴക്കം' : language === 'ta' ? 'தரவு வயது' : 'Data Age'}</th>
+                    <th style={{ padding: '0.6rem' }}>{language === 'te' ? 'మార్కెట్' : (language === 'hi' ? 'मंडी' : (language === 'ta' ? 'மண்டி' : (language === 'ml' ? 'വിപണി' : 'Market')))}</th>
+                    <th style={{ padding: '0.6rem' }}>{language === 'te' ? 'జిల్లా' : (language === 'hi' ? 'ज़िला' : (language === 'ta' ? 'மாவட்டம்' : (language === 'ml' ? 'ജില്ല' : 'District')))}</th>
+                    <th style={{ padding: '0.6rem' }}>{t.trends?.modalPrice || 'Modal Price'}</th>
+                    <th style={{ padding: '0.6rem' }}>{t.trends?.minMaxRange || 'Min - Max'}</th>
+                    <th style={{ padding: '0.6rem' }}>{t.trends?.arrivalQuantity || 'Arrivals'}</th>
+                    <th style={{ padding: '0.6rem' }}>{language === 'te' ? 'తేదీ' : (language === 'hi' ? 'तिथि' : (language === 'ta' ? 'தேதி' : (language === 'ml' ? 'തീയതി' : 'Observed Date')))}</th>
+                    <th style={{ padding: '0.6rem' }}>{t.forecast?.dataAge || 'Data Age'}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {comparisonMarkets.map((c) => (
+                  {sortedComparisonMarkets.map((c) => (
                     <tr
                       key={c.market}
                       style={{
@@ -632,7 +714,7 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
                       <td style={{ padding: '0.65rem', color: 'var(--text-muted)' }}>{c.arrival_quantity ? `${c.arrival_quantity} qtl` : '—'}</td>
                       <td style={{ padding: '0.65rem', fontWeight: 600 }}>{c.observation_date}</td>
                       <td style={{ padding: '0.65rem', color: c.data_age_days === 0 ? '#059669' : '#64748b' }}>
-                        {c.data_age_days === 0 ? (language === 'te' ? 'ఈ రోజు' : language === 'hi' ? 'आज' : language === 'ml' ? 'ഇന്ന്' : language === 'ta' ? 'இன்று' : 'Today') : `${c.data_age_days}d ago`}
+                        {c.data_age_days === 0 ? (language === 'te' ? 'ఈరోజు' : (language === 'hi' ? 'आज' : (language === 'ta' ? 'இன்று' : (language === 'ml' ? 'ഇന്ന്' : 'Today')))) : `${c.data_age_days}d ago`}
                       </td>
                     </tr>
                   ))}
@@ -643,15 +725,15 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
           </div>
         )}
 
-        {/* Excluded Markets (Stale Data > maxAgeDays or No Observations) */}
+        {/* Excluded Markets */}
         {excludedMarkets.length > 0 && (
-          <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-            <h5 style={{ margin: '0 0 0.5rem 0', fontSize: '0.85rem', fontWeight: 700, color: '#64748b' }}>
-              Excluded Markets ({excludedMarkets.length} mandis with no observations in the last {maxAgeDays} days):
+          <div style={{ marginTop: '1.25rem', padding: '0.85rem 1rem', background: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+            <h5 style={{ margin: '0 0 0.35rem 0', fontSize: '0.8rem', fontWeight: 700, color: '#64748b' }}>
+              {language === 'te' ? `మినహాయించబడిన మార్కెట్లు (గత ${maxAgeDays} రోజుల్లో లావాదేవీలు నమోదుకానివి):` : (language === 'hi' ? `बहिष्कृत मंडियां (पिछले ${maxAgeDays} दिनों में कोई अवलोकन नहीं):` : (language === 'ta' ? `விலக்கப்பட்ட மண்டிகள் (கடந்த ${maxAgeDays} நாட்களில் பதிவுகள் இல்லை):` : (language === 'ml' ? `ഒഴിവാക്കിയ വിപണികൾ (കഴിഞ്ഞ ${maxAgeDays} ദിവസങ്ങളിൽ നിരീക്ഷണങ്ങളില്ല):` : `Excluded Markets (${excludedMarkets.length} mandis with no observations in the last ${maxAgeDays} days):`)))}
             </h5>
-            <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: '0.8rem', color: '#64748b' }}>
+            <ul style={{ margin: 0, paddingLeft: '1.15rem', fontSize: '0.75rem', color: '#64748b' }}>
               {excludedMarkets.map(ex => (
-                <li key={ex.market} style={{ marginBottom: '0.2rem' }}>
+                <li key={ex.market} style={{ marginBottom: '0.15rem' }}>
                   <strong>{getLocalizedMarketName(ex.market, language)}</strong>: {ex.reason}
                 </li>
               ))}
