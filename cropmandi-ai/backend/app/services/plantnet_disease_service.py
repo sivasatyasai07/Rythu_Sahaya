@@ -5,6 +5,7 @@ import json
 import uuid
 import hashlib
 import logging
+import socket
 import requests
 from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime, timezone
@@ -38,6 +39,7 @@ logger = logging.getLogger(__name__)
 
 # Botanical scientific name to common Indian agricultural crop mapping
 BOTANICAL_SPECIES_TO_CROP: Dict[str, Dict[str, str]] = {
+
     "solanum lycopersicum": {"crop": "Tomato", "category": "vegetable"},
     "lycopersicon esculentum": {"crop": "Tomato", "category": "vegetable"},
     "allium cepa": {"crop": "Onion", "category": "vegetable"},
@@ -160,10 +162,41 @@ def map_plantnet_species(species_dict: Dict[str, Any]) -> Tuple[str, str, str, s
     return display_name, sci_name_full, category, "recognized_outside_configured_vocabulary"
 
 
+def is_network_error(exc: Optional[Exception] = None, err_str: Optional[str] = None) -> bool:
+    """
+    Checks if an exception or error string corresponds to an internet, DNS, socket, or network reachability failure.
+    """
+    if exc is not None:
+        if isinstance(exc, (requests.exceptions.ConnectionError, requests.exceptions.Timeout, socket.gaierror, TimeoutError)):
+            return True
+        exc_str = str(exc).lower()
+        if any(term in exc_str for term in [
+            "getaddrinfo failed", "11001", "name or service not known", "temporary failure in name resolution",
+            "failed to establish a new connection", "network is unreachable", "connection error",
+            "connection refused", "connection reset", "max retries exceeded", "no route to host",
+            "connecterror", "gaierror", "socket", "dns", "nameresolutionerror"
+        ]):
+            return True
+
+    if err_str:
+        err_lower = str(err_str).lower()
+        if any(term in err_lower for term in [
+            "getaddrinfo failed", "11001", "name or service not known", "temporary failure in name resolution",
+            "failed to establish a new connection", "network is unreachable", "connection error",
+            "connection refused", "connection reset", "max retries exceeded", "no route to host",
+            "connecterror", "gaierror", "nameresolutionerror", "socket"
+        ]):
+            return True
+
+    return False
+
+
 def classify_plantnet_error(status_code: int, exc: Optional[Exception] = None) -> Tuple[str, str]:
     """
     Classifies HTTP errors and exceptions into sanitized, safe diagnostic categories.
     """
+    if is_network_error(exc):
+        return "network_error", "No internet connection: Unable to connect to PlantNet API servers (DNS or network offline)."
     if status_code in (401, 403):
         return "plantnet_authentication_error", "PlantNet API authentication failed. Check API key configuration."
     if status_code == 404:
@@ -174,7 +207,8 @@ def classify_plantnet_error(status_code: int, exc: Optional[Exception] = None) -
         return "plantnet_timeout", "PlantNet identification service timed out. Please try again."
     if status_code >= 500:
         return "plantnet_unavailable", "PlantNet identification service is temporarily unavailable."
-    return "service_error", "An error occurred while communicating with PlantNet service."
+    return "service_error", f"An error occurred while communicating with PlantNet service: {exc or status_code}"
+
 
 
 def validate_plantnet_response(json_data: Any, status_code: int) -> Tuple[bool, str, List[Dict[str, Any]]]:
@@ -431,7 +465,7 @@ def identify_plant_image(
         base_url = settings.PLANTNET_BASE_URL.rstrip("/")
         project = settings.PLANTNET_PROJECT or "all"
         endpoint = f"{base_url}/{project}"
-        timeout_sec = float(getattr(settings, "PLANTNET_TIMEOUT_SECONDS", 120))
+        timeout_sec = float(getattr(settings, "PLANTNET_TIMEOUT_SECONDS", 300))
         max_retries = int(getattr(settings, "PLANTNET_MAX_RETRIES", 2))
 
         organ = map_plantnet_organ(plant_part)
@@ -483,10 +517,10 @@ def identify_plant_image(
                 logger.warning("[PLANTNET] Timeout on attempt %d: %s", attempt, exc)
                 last_error = exc
                 time.sleep(1.0)
-            except requests.RequestException as exc:
+            except (requests.RequestException, Exception) as exc:
                 logger.warning("[PLANTNET] Request exception on attempt %d: %s", attempt, exc)
                 last_error = exc
-                time.sleep(1.0)
+                time.sleep(0.1)
 
         plantnet_model = ModelInfo(
             provider="PlantNet",
@@ -594,21 +628,40 @@ def identify_plant_image(
         return plantnet_result, (plantnet_model or ModelInfo(provider="PlantNet", model_name="PlantNet-v2", request_timestamp=now_iso))
 
     # Case D: Both Failed or Unconfigured
-    err_msg = "Both Gemini Vision and PlantNet identification services are temporarily unavailable."
-    if gemini_error:
-        err_msg += f" Gemini error: {gemini_error}."
-    if plantnet_error:
-        err_msg += f" PlantNet error: {plantnet_error}."
+    is_gemini_net = is_network_error(err_str=gemini_error)
+    is_plantnet_net = (plantnet_error_category == "network_error") or is_network_error(err_str=plantnet_error)
+    is_net = is_gemini_net or is_plantnet_net
+
+    if is_net:
+        final_category = "network_error"
+        err_msg = "Internet Connection Issue: Unable to connect to plant diagnosis services. Please check your network or Wi-Fi connection and try again."
+        if gemini_error:
+            err_msg += f" Gemini: {gemini_error}."
+        if plantnet_error:
+            err_msg += f" PlantNet: {plantnet_error}."
+        disclaimer_text = "Plant diagnosis requires an active internet connection. Please verify your network connection and retry."
+        limitations_list = ["Requires an active internet connection to communicate with AI vision services."]
+        action_name = "check_internet_connection"
+    else:
+        final_category = plantnet_error_category or "service_error"
+        err_msg = "Both Gemini Vision and PlantNet identification services are temporarily unavailable."
+        if gemini_error:
+            err_msg += f" Gemini error: {gemini_error}."
+        if plantnet_error:
+            err_msg += f" PlantNet error: {plantnet_error}."
+        disclaimer_text = "Service is temporarily unavailable. Please verify API configuration in backend/.env and try again."
+        limitations_list = ["AI identification services temporarily unavailable."]
+        action_name = "retry_later"
 
     fallback_error_result = DiseaseAnalysisResult(
-        analysis_status=plantnet_error_category or "service_error",
+        analysis_status=final_category,
         provider="PlantNet / Gemini",
         selected_crop=selected_crop,
         identification_status="unavailable",
         disease_status="not_available",
-        validation_warnings=[ValidationWarning(field="service_availability", issue=err_msg, action="retry_later")],
-        limitations=["AI identification services temporarily unavailable."],
-        disclaimer="Service is temporarily unavailable. Please verify API configuration in backend/.env and try again."
+        validation_warnings=[ValidationWarning(field="service_availability", issue=err_msg, action=action_name)],
+        limitations=limitations_list,
+        disclaimer=disclaimer_text
     )
     fallback_model = ModelInfo(provider="System", model_name="fallback", request_timestamp=now_iso)
     return fallback_error_result, fallback_model

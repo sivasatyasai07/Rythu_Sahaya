@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings
 from typing import List, Union
 
 class Settings(BaseSettings):
-    APP_NAME: str = "CropMandi AI"
+    APP_NAME: str = "Rythu Sahaya"
     ENV: str = "development"
     LOG_LEVEL: str = "INFO"
     APP_TIMEZONE: str = "Asia/Kolkata"
@@ -60,7 +60,7 @@ class Settings(BaseSettings):
     PLANTNET_API_KEY: str = ""
     PLANTNET_BASE_URL: str = "https://my-api.plantnet.org/v2/identify"
     PLANTNET_PROJECT: str = "all"
-    PLANTNET_TIMEOUT_SECONDS: int = 120
+    PLANTNET_TIMEOUT_SECONDS: int = 300
     PLANTNET_MAX_RETRIES: int = 2
     PLANTNET_MIN_SCORE: float = 0.0
     PLANTNET_MAX_IMAGE_SIZE_MB: int = 10
@@ -71,7 +71,7 @@ class Settings(BaseSettings):
     # Gemini AI & Disease Detection
     GEMINI_API_KEY: str = ""
     GEMINI_MODEL: str = "gemini-3.6-flash"
-    GEMINI_TIMEOUT_SECONDS: int = 120
+    GEMINI_TIMEOUT_SECONDS: int = 300
     GEMINI_MAX_RETRIES: int = 2
     GEMINI_TEMPERATURE: float = 0.0
     DISEASE_PROMPT_VERSION: str = "crop-disease-v2"

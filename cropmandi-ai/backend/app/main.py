@@ -18,7 +18,8 @@ from app.routers import (
     admin,
     disease,
     forecast,
-    sync
+    sync,
+    chat
 )
 
 # Auto-create tables for SQLite / dev startup
@@ -27,7 +28,7 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title=settings.APP_NAME,
     version="2.0.0",
-    description="CropMandi AI – Verified 3-Day Farmer Mandi Price Prediction System API"
+    description="Rythu Sahaya – Better Market, Best Price, Save Time. APMC Mandi Price Intelligence & Advisory API"
 )
 
 # CORS configuration
@@ -58,6 +59,7 @@ app.include_router(admin.router)
 app.include_router(disease.router)
 app.include_router(forecast.router)
 app.include_router(sync.router, prefix="/api/v1")
+app.include_router(chat.router, prefix="/api/v1")
 
 @app.on_event("startup")
 def startup_price_sync_event():
@@ -74,7 +76,7 @@ def startup_price_sync_event():
 @app.get("/")
 def root():
     return {
-        "message": "Welcome to CropMandi AI Backend API",
+        "message": "Welcome to Rythu Sahaya Backend API",
         "docs_url": "/docs",
         "health_check": "/api/v1/health"
     }

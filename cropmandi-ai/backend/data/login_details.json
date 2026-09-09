@@ -1,7 +1,7 @@
 {
   "description": "CropMandi AI User Login and Authentication Records",
-  "last_updated": "2026-08-21T09:30:13.420239Z",
-  "total_logins": 19,
+  "last_updated": "2026-09-09T09:08:06.041987Z",
+  "total_logins": 27,
   "login_history": [
     {
       "event_id": "c3f5c1f8-7d66-43ef-9c63-87958ce9a3de",
@@ -211,6 +211,94 @@
       "timestamp": "2026-08-21T09:30:13.392945Z",
       "failure_reason": "Incorrect email or password",
       "client_ip": null
+    },
+    {
+      "event_id": "c9536b66-e329-4ed1-bc02-6bad88fa13da",
+      "event_type": "signup",
+      "email": "farmer.rao@example.com",
+      "user_id": "b60818a7-08e1-4be1-a143-d676c6c4c314",
+      "role": "farmer",
+      "status": "success",
+      "timestamp": "2026-09-08T08:30:25.235918Z",
+      "failure_reason": null,
+      "client_ip": null
+    },
+    {
+      "event_id": "70607da9-27ae-4b64-bd6d-e762eefc21e7",
+      "event_type": "signup",
+      "email": "login.test@example.com",
+      "user_id": "25c540bc-4cd8-45b8-bbd6-a40348cf7cc0",
+      "role": "farmer",
+      "status": "success",
+      "timestamp": "2026-09-08T08:30:25.578354Z",
+      "failure_reason": null,
+      "client_ip": null
+    },
+    {
+      "event_id": "9a5d7942-ea22-4f1c-b708-d06a1b8ab887",
+      "event_type": "login",
+      "email": "login.test@example.com",
+      "user_id": "25c540bc-4cd8-45b8-bbd6-a40348cf7cc0",
+      "role": "farmer",
+      "status": "success",
+      "timestamp": "2026-09-08T08:30:25.888306Z",
+      "failure_reason": null,
+      "client_ip": null
+    },
+    {
+      "event_id": "96e3d849-3afa-478f-9b87-6081d17ad6b3",
+      "event_type": "login",
+      "email": "login.test@example.com",
+      "user_id": null,
+      "role": "farmer",
+      "status": "failed",
+      "timestamp": "2026-09-08T08:30:26.194076Z",
+      "failure_reason": "Incorrect email or password",
+      "client_ip": null
+    },
+    {
+      "event_id": "2f9972f5-c56a-4f2c-a86a-45e65546bbac",
+      "event_type": "signup",
+      "email": "farmer.rao@example.com",
+      "user_id": "12ceb24f-6b51-410e-92e8-35267cb195d2",
+      "role": "farmer",
+      "status": "success",
+      "timestamp": "2026-09-09T09:08:05.096664Z",
+      "failure_reason": null,
+      "client_ip": null
+    },
+    {
+      "event_id": "8d41586f-4f1c-4e04-bb53-4dff7975b097",
+      "event_type": "signup",
+      "email": "login.test@example.com",
+      "user_id": "bc1ca826-6119-4eb4-992b-ead02cb797c2",
+      "role": "farmer",
+      "status": "success",
+      "timestamp": "2026-09-09T09:08:05.438163Z",
+      "failure_reason": null,
+      "client_ip": null
+    },
+    {
+      "event_id": "eee3827d-3d12-4490-baa0-dc0b3010eb21",
+      "event_type": "login",
+      "email": "login.test@example.com",
+      "user_id": "bc1ca826-6119-4eb4-992b-ead02cb797c2",
+      "role": "farmer",
+      "status": "success",
+      "timestamp": "2026-09-09T09:08:05.737387Z",
+      "failure_reason": null,
+      "client_ip": null
+    },
+    {
+      "event_id": "b4d350a5-8001-4b33-868e-5b15f59fd0df",
+      "event_type": "login",
+      "email": "login.test@example.com",
+      "user_id": null,
+      "role": "farmer",
+      "status": "failed",
+      "timestamp": "2026-09-09T09:08:06.031755Z",
+      "failure_reason": "Incorrect email or password",
+      "client_ip": null
     }
   ],
   "registered_users": [
@@ -228,8 +316,8 @@
       "email": "farmer.rao@example.com",
       "role": "farmer",
       "first_seen": "2026-08-21T04:43:48.280666Z",
-      "last_login_at": "2026-08-21T09:30:11.653982Z",
-      "login_count": 4,
+      "last_login_at": "2026-09-09T09:08:05.096664Z",
+      "login_count": 6,
       "last_attempt_status": "success"
     },
     {
@@ -237,8 +325,8 @@
       "email": "login.test@example.com",
       "role": "farmer",
       "first_seen": "2026-08-21T04:43:48.911140Z",
-      "last_login_at": "2026-08-21T09:30:12.848372Z",
-      "login_count": 8,
+      "last_login_at": "2026-09-09T09:08:05.737387Z",
+      "login_count": 12,
       "last_attempt_status": "failed"
     }
   ]

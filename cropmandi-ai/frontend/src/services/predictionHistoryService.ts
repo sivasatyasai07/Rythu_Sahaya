@@ -28,20 +28,54 @@ export interface SavePredictionParams {
   predictionResponse: PredictionResponse;
 }
 
+async function getAuthUserId(): Promise<string | null> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user?.id) return user.id;
+  } catch {
+    // ignore
+  }
+
+  const token = localStorage.getItem('cropmandi_auth_token');
+  if (token) {
+    try {
+      const parts = token.split('.');
+      if (parts.length === 3) {
+        const decoded = JSON.parse(atob(parts[1]));
+        if (decoded.sub || decoded.id) return String(decoded.sub || decoded.id);
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  const storedUser = localStorage.getItem('cropmandi_user_cache');
+  if (storedUser) {
+    try {
+      const u = JSON.parse(storedUser);
+      if (u.id) return String(u.id);
+    } catch {
+      // ignore
+    }
+  }
+
+  return null;
+}
+
 export const predictionHistoryService = {
   /**
-   * Save a newly generated forecast to Supabase prediction_history table
+   * Save a newly generated forecast for authenticated user
    */
   async savePrediction(params: SavePredictionParams): Promise<PredictionHistoryRecord | null> {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      // Anonymous user — do not persist
+    const userId = await getAuthUserId();
+    if (!userId) {
+      // Anonymous / guest user — do not persist history
       return null;
     }
 
     const { crop, market, state, district, predictionDate, predictionResponse } = params;
     
-    // Calculate 7-day or horizon stats
+    // Calculate stats
     const currentPrice = predictionResponse.latest_observed_price || 0;
     const predictions = predictionResponse.predictions || [];
     const predictedPrices = predictions.map((p) => p.predicted_modal_price).filter((p) => typeof p === 'number');
@@ -50,8 +84,9 @@ export const predictionHistoryService = {
     const minPrice = predictedPrices.length > 0 ? Math.min(...predictedPrices) : currentPrice;
     const maxPrice = predictedPrices.length > 0 ? Math.max(...predictedPrices) : currentPrice;
 
-    const payload = {
-      user_id: user.id,
+    const record: PredictionHistoryRecord = {
+      id: `pred_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      user_id: userId,
       crop: crop,
       market: market,
       state: state || 'Andhra Pradesh',
@@ -61,63 +96,131 @@ export const predictionHistoryService = {
       min_price: minPrice,
       max_price: maxPrice,
       trend: predictionResponse.trend_direction || 'stable',
-      forecast_days: predictions.length || 7,
+      forecast_days: predictions.length || 3,
       prediction_date: predictionDate || new Date().toISOString().split('T')[0],
       model_name: `${predictionResponse.model_name || 'CatBoost'} v${predictionResponse.model_version || '1.0'}`,
+      created_at: new Date().toISOString(),
     };
 
+    // 1. Persist to user-scoped LocalStorage
+    try {
+      const storageKey = `cropmandi_prediction_history_${userId}`;
+      const existingRaw = localStorage.getItem(storageKey);
+      const existing: PredictionHistoryRecord[] = existingRaw ? JSON.parse(existingRaw) : [];
+      const updated = [record, ...existing.filter((item) => item.id !== record.id)].slice(0, 100);
+      localStorage.setItem(storageKey, JSON.stringify(updated));
+    } catch (lsErr) {
+      console.warn('LocalStorage save failed:', lsErr);
+    }
+
+    // 2. Persist to Supabase if available
     try {
       const { data, error } = await supabase
         .from('prediction_history')
-        .insert(payload)
+        .insert({
+          user_id: userId,
+          crop: record.crop,
+          market: record.market,
+          state: record.state,
+          district: record.district,
+          current_price: record.current_price,
+          predicted_price: record.predicted_price,
+          min_price: record.min_price,
+          max_price: record.max_price,
+          trend: record.trend,
+          forecast_days: record.forecast_days,
+          prediction_date: record.prediction_date,
+          model_name: record.model_name,
+        })
         .select()
         .single();
 
-      if (error) {
-        console.warn('Failed to save prediction to Supabase:', error.message);
-        return null;
+      if (!error && data) {
+        return data as PredictionHistoryRecord;
       }
-      return data as PredictionHistoryRecord;
     } catch (e) {
-      console.warn('Error inserting prediction history:', e);
-      return null;
+      console.warn('Supabase insertion skipped or failed:', e);
     }
+
+    return record;
   },
 
   /**
    * Fetch all price predictions for the authenticated user
    */
   async fetchHistory(limit: number = 50): Promise<PredictionHistoryRecord[]> {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    const userId = await getAuthUserId();
+    if (!userId) return [];
 
-    const { data, error } = await supabase
-      .from('prediction_history')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(limit);
-
-    if (error) {
-      console.error('Failed to fetch prediction history:', error.message);
-      return [];
+    let localRecords: PredictionHistoryRecord[] = [];
+    try {
+      const storageKey = `cropmandi_prediction_history_${userId}`;
+      const existingRaw = localStorage.getItem(storageKey);
+      if (existingRaw) {
+        localRecords = JSON.parse(existingRaw);
+      }
+    } catch (err) {
+      console.warn('Error reading local prediction history:', err);
     }
 
-    return (data || []) as PredictionHistoryRecord[];
+    let supabaseRecords: PredictionHistoryRecord[] = [];
+    try {
+      const { data, error } = await supabase
+        .from('prediction_history')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (!error && data) {
+        supabaseRecords = data as PredictionHistoryRecord[];
+      }
+    } catch {
+      // ignore
+    }
+
+    // Merge and deduplicate
+    const combinedMap = new Map<string, PredictionHistoryRecord>();
+    for (const r of [...localRecords, ...supabaseRecords]) {
+      const key = `${r.crop}_${r.market}_${r.prediction_date}_${r.predicted_price}`;
+      if (!combinedMap.has(key)) {
+        combinedMap.set(key, r);
+      }
+    }
+
+    const merged = Array.from(combinedMap.values()).sort(
+      (a, b) => new Date(b.created_at || b.prediction_date).getTime() - new Date(a.created_at || a.prediction_date).getTime()
+    );
+
+    return merged.slice(0, limit);
   },
 
   /**
    * Delete a prediction record
    */
   async deleteRecord(id: string): Promise<boolean> {
-    const { error } = await supabase
-      .from('prediction_history')
-      .delete()
-      .eq('id', id);
+    const userId = await getAuthUserId();
+    if (userId) {
+      try {
+        const storageKey = `cropmandi_prediction_history_${userId}`;
+        const existingRaw = localStorage.getItem(storageKey);
+        if (existingRaw) {
+          const existing: PredictionHistoryRecord[] = JSON.parse(existingRaw);
+          const updated = existing.filter((item) => item.id !== id);
+          localStorage.setItem(storageKey, JSON.stringify(updated));
+        }
+      } catch {
+        // ignore
+      }
 
-    if (error) {
-      console.error('Failed to delete prediction record:', error.message);
-      return false;
+      try {
+        await supabase
+          .from('prediction_history')
+          .delete()
+          .eq('id', id);
+      } catch {
+        // ignore
+      }
     }
     return true;
   },

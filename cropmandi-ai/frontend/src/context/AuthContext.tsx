@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
-import type { User, UserProfile, LoginRequest, SignupRequest } from '../types/auth';
+import type { User, UserProfile, LoginRequest, SignupRequest, AuthResponse } from '../types/auth';
 import { authService } from '../services/authService';
 import { supabase } from '../lib/supabase';
 
@@ -11,11 +11,12 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (data: LoginRequest) => Promise<void>;
-  signup: (data: SignupRequest) => Promise<void>;
+  signup: (data: SignupRequest) => Promise<AuthResponse>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  resendVerificationEmail: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -89,13 +90,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const signup = async (data: SignupRequest) => {
+  const signup = async (data: SignupRequest): Promise<AuthResponse> => {
     setIsLoading(true);
     try {
       const res = await authService.signup(data);
-      setUser(res.user);
-      setProfile(res.user.profile || null);
-      setToken(res.access_token);
+      if (res.access_token) {
+        setUser(res.user);
+        setProfile(res.user.profile || null);
+        setToken(res.access_token);
+      } else {
+        setUser(null);
+        setProfile(null);
+        setToken(null);
+      }
+      return res;
     } finally {
       setIsLoading(false);
     }
@@ -126,6 +134,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     await authService.resetPassword(email);
   };
 
+  const resendVerificationEmail = async (email: string) => {
+    await authService.resendVerificationEmail(email);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -140,6 +152,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         refreshUser,
         updateProfile,
         resetPassword,
+        resendVerificationEmail,
       }}
     >
       {children}

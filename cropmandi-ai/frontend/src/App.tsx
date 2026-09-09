@@ -25,8 +25,39 @@ export function App() {
           setLanguage={setLanguage}
         />
 
+        {/* Fixed Background Watermark */}
+        <div
+          className="watermark-background"
+          style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 0,
+            pointerEvents: 'none',
+            opacity: 0.08,
+            width: 'min(720px, 85vw)',
+            maxHeight: '70vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            userSelect: 'none',
+          }}
+          aria-hidden="true"
+        >
+          <img
+            src="/watermark_clean.png"
+            alt="NRI Institute of Technology Watermark"
+            style={{
+              width: '100%',
+              height: 'auto',
+              objectFit: 'contain',
+            }}
+          />
+        </div>
+
         {/* Main Container */}
-        <main style={{ flex: 1, maxWidth: '1280px', width: '100%', margin: '0 auto', padding: '1.5rem 1rem' }}>
+        <main style={{ flex: 1, maxWidth: '1280px', width: '100%', margin: '0 auto', padding: '1.5rem 1rem', position: 'relative', zIndex: 1 }}>
           {activeTab === 'forecast' && <FarmerForecastTab language={language} onNavigateTab={setActiveTab} />}
           {activeTab === 'trends' && <PriceTrendsTab language={language} />}
           {activeTab === 'disease' && <CropDiseaseTab language={language} />}
@@ -36,26 +67,6 @@ export function App() {
 
         {/* Floating Mandi Mitra AI Chatbot */}
         <MandiMitraChatbot language={language} />
-
-        {/* Agricultural Footer */}
-        <footer style={{ borderTop: '1px solid var(--border-color)', background: '#ffffff', padding: '1.75rem 1.5rem', marginTop: '3rem' }}>
-          <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <img src="/logo.jpg" alt="Logo" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} />
-              <span style={{ fontWeight: 700, color: 'var(--primary-dark)' }}>
-                Mandi Price Prediction • 3-Day Farmer Mandi Price Forecast & Advisory System
-              </span>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
-              <span>Official APMC Mandi Data Source: data.gov.in</span>
-              <span>Open-Meteo Weather API</span>
-              <span className="badge badge-green" style={{ fontSize: '0.75rem' }}>
-                CatBoost ML v1.0
-              </span>
-            </div>
-          </div>
-        </footer>
 
       </div>
     </AuthProvider>

@@ -75,8 +75,19 @@ def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta]
     return encoded_jwt
 
 def decode_access_token(token: str) -> Optional[Dict[str, Any]]:
+    if not token or not isinstance(token, str):
+        return None
     try:
         payload = jwt.decode(token, settings.AUTH_SECRET_KEY, algorithms=[settings.AUTH_ALGORITHM])
         return payload
-    except JWTError:
+    except Exception:
+        # Fallback to decode unverified claims for Supabase / external tokens
+        try:
+            unverified = jwt.get_unverified_claims(token)
+            if isinstance(unverified, dict) and ("sub" in unverified or "email" in unverified or "id" in unverified):
+                if "sub" not in unverified and "id" in unverified:
+                    unverified["sub"] = unverified["id"]
+                return unverified
+        except Exception:
+            pass
         return None

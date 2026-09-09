@@ -63,12 +63,9 @@ export const ForecastLoadingState: React.FC<ForecastLoadingStateProps> = ({
       </div>
 
       <div>
-        <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.35rem 0' }}>
+        <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
           {currentLabel}
         </h3>
-        <p style={{ fontSize: '0.88rem', color: '#64748b', margin: '0 auto', maxWidth: '520px' }}>
-          {t.forecast?.loadingSubtitle || 'Executing strict 5-level precedence: Official API (data.gov.in) → master-data.csv → CatBoost ML Prediction → Fallback → Unavailable.'}
-        </p>
       </div>
 
       <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.5rem' }}>

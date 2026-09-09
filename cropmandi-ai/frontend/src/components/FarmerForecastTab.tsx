@@ -576,7 +576,7 @@ export const FarmerForecastTab: React.FC<Props> = ({ language }) => {
           }}
           title="Andhra Pradesh Agricultural Marketing Department"
         >
-          <img src="/logo.jpg" alt="APMC Seal" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src="/logo.png" alt="Rythu Sahaya" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
       </div>
 

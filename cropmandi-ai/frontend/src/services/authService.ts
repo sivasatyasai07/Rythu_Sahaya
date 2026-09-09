@@ -183,6 +183,22 @@ export const authService = {
   },
 
   /**
+   * Resend Email Confirmation Link for unverified signups
+   */
+  async resendVerificationEmail(email: string): Promise<void> {
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: email.trim().toLowerCase(),
+      options: {
+        emailRedirectTo: window.location.origin,
+      },
+    });
+    if (error) {
+      throw new Error(error.message);
+    }
+  },
+
+  /**
    * Supabase Auth Log Out
    */
   async logout(): Promise<void> {
@@ -195,3 +211,4 @@ export const authService = {
     }
   },
 };
+

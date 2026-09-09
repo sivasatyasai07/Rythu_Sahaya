@@ -291,7 +291,7 @@ def compare_market_prices(
     state: Optional[str] = Query(None),
     district: Optional[str] = Query(None),
     date: Optional[str] = Query(None, alias="date"),
-    max_age_days: int = Query(7, ge=1, le=365),
+    max_age_days: int = Query(30, ge=1, le=365),
     force_refresh: bool = Query(True),
     db: Session = Depends(get_db)
 ):
@@ -307,7 +307,7 @@ def compare_market_prices(
     if not isinstance(date, str):
         date = None
     if not isinstance(max_age_days, int) or max_age_days <= 0:
-        max_age_days = 7
+        max_age_days = 30
     if not isinstance(force_refresh, bool):
         force_refresh = True
 

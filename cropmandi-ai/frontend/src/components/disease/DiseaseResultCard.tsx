@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { DiseaseAnalysisResult, ImageMetadata } from '../../types/disease';
 import type { Language } from '../../i18n/translations';
+import { getDiseaseI18n } from '../../utils/i18nDisease';
 import {
   AlertTriangle,
   Activity,
   Sparkles,
-  Layers,
   Leaf,
   CheckCircle2,
   XCircle,
@@ -15,6 +15,10 @@ import {
   Stethoscope,
   Wrench,
   CheckCheck,
+  WifiOff,
+  HelpCircle,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { DiagnosisConfidence } from './DiagnosisConfidence';
 
@@ -28,8 +32,31 @@ export interface DiseaseResultCardProps {
 
 export const DiseaseResultCard: React.FC<DiseaseResultCardProps> = ({
   result,
+  language = 'en',
 }) => {
+  const [showTechDetails, setShowTechDetails] = useState<boolean>(false);
+  const dI18n = getDiseaseI18n(language);
   const status = result.analysis_status || 'success';
+
+  const isNetworkError =
+    status === 'network_error' ||
+    status === 'internet_offline' ||
+    Boolean(
+      result.validation_warnings?.some((w: any) => {
+        const txt = (typeof w === 'string' ? w : (w.issue || '')).toLowerCase();
+        return (
+          txt.includes('getaddrinfo') ||
+          txt.includes('11001') ||
+          txt.includes('no internet') ||
+          txt.includes('network connection') ||
+          txt.includes('internet connection') ||
+          txt.includes('name or service not known') ||
+          txt.includes('temporary failure in name resolution') ||
+          txt.includes('connecterror') ||
+          txt.includes('failed to establish a new connection')
+        );
+      })
+    );
 
   const isServiceError = [
     'service_error',
@@ -42,6 +69,141 @@ export const DiseaseResultCard: React.FC<DiseaseResultCardProps> = ({
 
   const isInsufficientEvidence = status === 'insufficient_evidence';
   const isNonPlant = status === 'non_plant_image';
+
+  // 0. NO INTERNET / NETWORK DISCONNECTION STATE
+  if (isNetworkError) {
+    return (
+      <div
+        style={{
+          background: '#ffffff',
+          borderRadius: '16px',
+          border: '1px solid #fed7aa',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+          padding: '2rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1.25rem',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '50px',
+              height: '50px',
+              borderRadius: '12px',
+              background: '#ffedd5',
+              color: '#ea580c',
+              flexShrink: 0,
+            }}
+          >
+            <WifiOff size={28} />
+          </div>
+          <div>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: '#9a3412' }}>
+              {dI18n.networkErrorTitle}
+            </h3>
+            <span style={{ fontSize: '0.82rem', color: '#c2410c', fontWeight: 600 }}>
+              Network / Internet Offline
+            </span>
+          </div>
+        </div>
+
+        <div
+          style={{
+            background: '#fff7ed',
+            border: '1px solid #ffedd5',
+            borderRadius: '12px',
+            padding: '1.25rem',
+            color: '#9a3412',
+            fontSize: '0.95rem',
+            lineHeight: 1.5,
+          }}
+        >
+          <p style={{ margin: '0 0 0.75rem 0', fontWeight: 600, fontSize: '0.95rem' }}>
+            {dI18n.networkErrorSubtitle}
+          </p>
+
+          <div
+            style={{
+              background: '#ffffff',
+              borderRadius: '10px',
+              padding: '0.85rem 1.1rem',
+              border: '1px solid #fed7aa',
+              marginTop: '0.75rem',
+            }}
+          >
+            <div
+              style={{
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                color: '#9a3412',
+                marginBottom: '0.4rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+              }}
+            >
+              <HelpCircle size={15} />
+              <span>{dI18n.networkTroubleshootTitle}:</span>
+            </div>
+            <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: '0.85rem', color: '#7c2d12', lineHeight: 1.6 }}>
+              <li>{dI18n.networkCheckWifi}</li>
+              <li>{dI18n.networkRetryPrompt}</li>
+            </ul>
+          </div>
+
+          {/* Collapsible Technical Details */}
+          {result.validation_warnings && result.validation_warnings.length > 0 && (
+            <div style={{ marginTop: '0.85rem' }}>
+              <button
+                type="button"
+                onClick={() => setShowTechDetails(!showTechDetails)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#c2410c',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  padding: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.3rem',
+                  textDecoration: 'underline',
+                }}
+              >
+                {showTechDetails ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                <span>{showTechDetails ? 'Hide' : 'Show'} {dI18n.technicalDetails}</span>
+              </button>
+
+              {showTechDetails && (
+                <div
+                  style={{
+                    marginTop: '0.5rem',
+                    background: '#fef2f2',
+                    border: '1px solid #fee2e2',
+                    borderRadius: '8px',
+                    padding: '0.75rem',
+                    fontFamily: 'monospace',
+                    fontSize: '0.78rem',
+                    color: '#991b1b',
+                    wordBreak: 'break-all',
+                  }}
+                >
+                  {result.validation_warnings.map((w, idx) => (
+                    <div key={idx}>{typeof w === 'string' ? w : w.issue}</div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   // 1. SERVICE ERROR / PROVIDER UNAVAILABLE STATE
   if (isServiceError) {
@@ -457,62 +619,7 @@ export const DiseaseResultCard: React.FC<DiseaseResultCardProps> = ({
         </div>
       )}
 
-      {/* 6. PLANTNET RANKED CANDIDATE MATCHES (if available) */}
-      {result.plantnet_results && result.plantnet_results.length > 0 && (
-        <div
-          style={{
-            background: '#f8fafc',
-            borderRadius: '12px',
-            padding: '1.25rem 1.5rem',
-            border: '1px solid #e2e8f0',
-          }}
-        >
-          <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.75rem 0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <Layers size={18} color="var(--primary)" />
-            Ranked PlantNet Candidate Matches
-          </h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {result.plantnet_results.map((cand, idx) => (
-              <div
-                key={idx}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  background: '#ffffff',
-                  padding: '0.65rem 1rem',
-                  borderRadius: '8px',
-                  border: '1px solid #e2e8f0',
-                  fontSize: '0.88rem',
-                }}
-              >
-                <div>
-                  <strong style={{ color: '#0f172a' }}>#{cand.rank} {cand.scientific_name}</strong>
-                  {cand.common_names && cand.common_names.length > 0 && (
-                    <span style={{ color: '#64748b', marginLeft: '0.5rem', fontSize: '0.82rem' }}>
-                      ({cand.common_names.slice(0, 2).join(', ')})
-                    </span>
-                  )}
-                </div>
-                <span
-                  style={{
-                    background: '#f1f5f9',
-                    padding: '0.2rem 0.6rem',
-                    borderRadius: '6px',
-                    fontWeight: 700,
-                    fontSize: '0.82rem',
-                    color: '#334155',
-                  }}
-                >
-                  Score: {Math.round(cand.score * 100)}%
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 7. DISCLAIMER */}
+      {/* 6. DISCLAIMER */}
       <div
         style={{
           background: '#f8fafc',

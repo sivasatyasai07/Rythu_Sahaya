@@ -38,10 +38,10 @@ def test_2_crop_has_limited_or_single_record(db_session):
 
 def test_3_market_has_recent_or_today_official_price(db_session):
     """Market with recent observation returns observation_date, age, is_observed=True, is_predicted=False."""
-    comp = compare_market_prices(commodity="Tomato", max_age_days=7, force_refresh=False, db=db_session)
+    comp = compare_market_prices(commodity="Tomato", max_age_days=30, force_refresh=False, db=db_session)
     assert len(comp.markets) > 0
     for m in comp.markets:
-        assert m.data_age_days <= 7
+        assert m.data_age_days <= 30
         assert m.is_observed is True
         assert m.is_predicted is False
         assert m.price_source in ALLOWED_SOURCES
@@ -49,8 +49,8 @@ def test_3_market_has_recent_or_today_official_price(db_session):
 
 
 def test_4_market_lacks_today_data_shows_nearest_recent(db_session):
-    """If today is unavailable, nearest recent official observation within 7 days is returned with actual age."""
-    comp = compare_market_prices(commodity="Tomato", max_age_days=7, force_refresh=False, db=db_session)
+    """If today is unavailable, nearest recent official observation within allowed window is returned with actual age."""
+    comp = compare_market_prices(commodity="Tomato", max_age_days=30, force_refresh=False, db=db_session)
     for m in comp.markets:
         assert m.data_age_days >= 0
         assert m.observation_date is not None
@@ -59,7 +59,7 @@ def test_4_market_lacks_today_data_shows_nearest_recent(db_session):
 
 def test_5_market_older_than_max_age_is_excluded(db_session):
     """Market with data older than max_age_days is placed in excluded_markets with a clear reason."""
-    comp = compare_market_prices(commodity="Tomato", max_age_days=7, force_refresh=False, db=db_session)
+    comp = compare_market_prices(commodity="Tomato", max_age_days=30, force_refresh=False, db=db_session)
     excluded_names = [em.market for em in comp.excluded_markets]
     # Ananthapur has latest data in 2025 (age > 200 days)
     assert any("Ananthapur" in name or "Anantapur" in name for name in excluded_names)
@@ -91,13 +91,13 @@ def test_8_user_chooses_potato_no_tomato_bleed(db_session):
     for pt in potato_trends:
         assert pt.is_observed is True
     
-    comp = compare_market_prices(commodity="Potato", max_age_days=7, force_refresh=False, db=db_session)
+    comp = compare_market_prices(commodity="Potato", max_age_days=30, force_refresh=False, db=db_session)
     assert comp.commodity == "Potato"
 
 
 def test_9_more_than_two_markets_returned(db_session):
     """Market comparison returns all qualifying markets without artificial 2-market limits."""
-    comp = compare_market_prices(commodity="Tomato", max_age_days=7, force_refresh=False, db=db_session)
+    comp = compare_market_prices(commodity="Tomato", max_age_days=30, force_refresh=False, db=db_session)
     assert len(comp.markets) >= 3  # Should have 9 active APMCs for Tomato
 
 

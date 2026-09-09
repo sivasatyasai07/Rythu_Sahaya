@@ -36,8 +36,8 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Brand Logo & Title */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
           <img
-            src="/logo.jpg"
-            alt="CropMandi AI Logo"
+            src="/logo.png"
+            alt="Rythu Sahaya Logo"
             style={{
               width: '48px',
               height: '48px',

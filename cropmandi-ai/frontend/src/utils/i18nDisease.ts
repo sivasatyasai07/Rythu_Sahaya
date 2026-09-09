@@ -72,6 +72,12 @@ export interface DiseaseI18nLabels {
   historyTitle: string;
   newAnalysisBtn: string;
   analyzeAnotherBtn: string;
+  networkErrorTitle: string;
+  networkErrorSubtitle: string;
+  networkTroubleshootTitle: string;
+  networkCheckWifi: string;
+  networkRetryPrompt: string;
+  technicalDetails: string;
 }
 
 export const diseaseI18nMap: Record<Language, DiseaseI18nLabels> = {
@@ -155,7 +161,13 @@ export const diseaseI18nMap: Record<Language, DiseaseI18nLabels> = {
     allCrops: "All Crops",
     historyTitle: "Diagnostic History",
     newAnalysisBtn: "New Analysis",
-    analyzeAnotherBtn: "Analyze Another Crop Image"
+    analyzeAnotherBtn: "Analyze Another Crop Image",
+    networkErrorTitle: "No Internet Connection",
+    networkErrorSubtitle: "Unable to connect to AI vision & plant diagnosis services. Please check your network or Wi-Fi connection and try again.",
+    networkTroubleshootTitle: "Troubleshooting Tips",
+    networkCheckWifi: "Verify that your Wi-Fi or mobile data is turned on and active.",
+    networkRetryPrompt: "Click 'Try Again' once your internet connection is restored.",
+    technicalDetails: "Technical Error Details"
   },
 
   te: {
@@ -238,7 +250,13 @@ export const diseaseI18nMap: Record<Language, DiseaseI18nLabels> = {
     allCrops: "అన్ని పంటలు",
     historyTitle: "గత రోగ రికార్డులు",
     newAnalysisBtn: "కొత్త నిర్ధారణ",
-    analyzeAnotherBtn: "మరొక ఫోటోను పరీక్షించండి"
+    analyzeAnotherBtn: "మరొక ఫోటోను పరీక్షించండి",
+    networkErrorTitle: "ఇంటర్నెట్ కనెక్షన్ సమస్య",
+    networkErrorSubtitle: "AI పంట తెగుళ్ళ నిర్ధారణ సేవలను సంప్రదించలేకపోయాము. దయచేసి మీ ఇంటర్నెట్ లేదా Wi-Fi కనెక్షన్ సరిచూసుకొని మళ్లీ ప్రయత్నించండి.",
+    networkTroubleshootTitle: "పరిష్కార సూచనలు",
+    networkCheckWifi: "మీ మొబైల్ డేటా లేదా Wi-Fi ఆన్‌లో ఉందో లేదో తనిఖీ చేయండి.",
+    networkRetryPrompt: "ఇంటర్నెట్ కనెక్ట్ అయిన తర్వాత 'మళ్లీ ప్రయత్నించండి' పై క్లిక్ చేయండి.",
+    technicalDetails: "సాంకేతిక లోపం వివరాలు"
   },
 
   hi: {
@@ -321,7 +339,13 @@ export const diseaseI18nMap: Record<Language, DiseaseI18nLabels> = {
     allCrops: "सभी फसलें",
     historyTitle: "निदान इतिहास",
     newAnalysisBtn: "नया निदान",
-    analyzeAnotherBtn: "अन्य फसल तस्वीर जांचें"
+    analyzeAnotherBtn: "अन्य फसल तस्वीर जांचें",
+    networkErrorTitle: "इंटरनेट कनेक्शन समस्या",
+    networkErrorSubtitle: "AI फसल रोग निदान सर्वर से संपर्क नहीं हो पाया। कृपया अपना इंटरनेट या वाई-फ़ाई कनेक्शन जांचें और पुनः प्रयास करें।",
+    networkTroubleshootTitle: "सुझाव",
+    networkCheckWifi: "जांचें कि मोबाइल डेटा या वाई-फ़ाई चालू और सक्रिय है।",
+    networkRetryPrompt: "इंटरनेट जुड़ने के बाद 'पुनः प्रयास करें' पर क्लिक करें।",
+    technicalDetails: "तकनीकी त्रुटि विवरण"
   },
 
   ml: {
@@ -404,7 +428,13 @@ export const diseaseI18nMap: Record<Language, DiseaseI18nLabels> = {
     allCrops: "എല്ലാ വിളകളും",
     historyTitle: "ചരിത്രം",
     newAnalysisBtn: "പുതിയ പരിശോധന",
-    analyzeAnotherBtn: "മറ്റൊരു ചിത്രം പരിശോധിക്കുക"
+    analyzeAnotherBtn: "മറ്റൊരു ചിത്രം പരിശോധിക്കുക",
+    networkErrorTitle: "ഇന്റർനെറ്റ് കണക്ഷൻ പ്രശ്നം",
+    networkErrorSubtitle: "AI രോഗനിർണയ സേവനവുമായി ബന്ധപ്പെടാൻ സാധിച്ചില്ല. ദയവായി ഇന്റർനെറ്റ് അല്ലെങ്കിൽ വൈ-ഫൈ പരിശോധിച്ച ശേഷം വീണ്ടും ശ്രമിക്കുക.",
+    networkTroubleshootTitle: "പരിഹാര നിർദ്ദേശങ്ങൾ",
+    networkCheckWifi: "മൊബൈൽ ഡാറ്റ അല്ലെങ്കിൽ വൈ-ഫൈ ഓൺ ആണെന്ന് ഉറപ്പുവരുത്തുക.",
+    networkRetryPrompt: "ഇന്റർനെറ്റ് ലഭിച്ച ശേഷം വീണ്ടും ശ്രമിക്കുക.",
+    technicalDetails: "സാങ്കേതിക വിവരങ്ങൾ"
   },
 
   ta: {
@@ -487,7 +517,13 @@ export const diseaseI18nMap: Record<Language, DiseaseI18nLabels> = {
     allCrops: "அனைத்து பயிர்கள்",
     historyTitle: "வரலாறு",
     newAnalysisBtn: "புதிய ஆய்வு",
-    analyzeAnotherBtn: "மற்றொரு படத்தை ஆய்வு செய்"
+    analyzeAnotherBtn: "மற்றொரு படத்தை ஆய்வு செய்",
+    networkErrorTitle: "இணைய இணைப்பு பிழை",
+    networkErrorSubtitle: "AI பயிர் நோய் கண்டறிதல் சேவையுடன் தொடர்பு கொள்ள முடியவில்லை. உங்கள் இணையம் அல்லது வைஃபை இணைப்பை சரிபார்த்து மீண்டும் முயற்சிக்கவும்.",
+    networkTroubleshootTitle: "சரிபார்க்கும் குறிப்புகள்",
+    networkCheckWifi: "உங்கள் மொபைல் டேட்டா அல்லது வைஃபை ஆன் செய்யப்பட்டுள்ளதா என சரிபார்க்கவும்.",
+    networkRetryPrompt: "இணைய இணைப்பு கிடைத்ததும் மீண்டும் முயற்சிக்கவும்.",
+    technicalDetails: "தொழில்நுட்ப பிழை விவரங்கள்"
   }
 };
 

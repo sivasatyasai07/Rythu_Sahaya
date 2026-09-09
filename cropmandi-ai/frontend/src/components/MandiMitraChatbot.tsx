@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { Language } from '../i18n/translations';
 import { translations } from '../i18n/translations';
-import { X, Send, Bot, User, Sparkles, RefreshCw } from 'lucide-react';
+import { api } from '../api';
+import { X, Send, Bot, User, RefreshCw } from 'lucide-react';
 
 interface Props {
   language: Language;
@@ -57,35 +58,36 @@ export const MandiMitraChatbot: React.FC<Props> = ({ language }) => {
     if (!textToSend) setInputMsg('');
     setLoading(true);
 
+    let botReplyText = '';
+
+    // 1. Try Backend Gemini Router first
     try {
-      // Call Gemini API (gemini-flash-latest endpoint)
-      let response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [
-              {
-                role: 'user',
-                parts: [
-                  {
-                    text: `Answer the user question directly and concisely in language: ${language === 'te' ? 'Telugu' : language === 'hi' ? 'Hindi' : language === 'ml' ? 'Malayalam' : language === 'ta' ? 'Tamil' : 'English'}.
-CRITICAL INSTRUCTION: Do NOT introduce yourself, do NOT say "I am Mandi Mitra AI", "Namaste", or add any filler preambles. Give ONLY the direct factual answer to the question in 1-3 short sentences.
+      const response = await api.post('/chat', {
+        message: text.trim(),
+        language: language,
+      });
 
-Question: "${text}"`
-                  }
-                ]
-              }
-            ]
-          })
-        }
-      );
+      if (response.data && response.data.reply) {
+        botReplyText = response.data.reply;
+      }
+    } catch (backendErr) {
+      console.warn('Backend chat failed, falling back to direct Gemini API:', backendErr);
+    }
 
-      if (!response.ok) {
-        // Retry with gemini-3.5-flash endpoint if needed
-        response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+    // 2. If Backend failed or returned empty, try direct Gemini API
+    if (!botReplyText && GEMINI_API_KEY) {
+      try {
+        const langMap: Record<string, string> = {
+          te: 'Telugu',
+          hi: 'Hindi',
+          ml: 'Malayalam',
+          ta: 'Tamil',
+          en: 'English',
+        };
+        const targetLang = langMap[language] || 'English';
+
+        const directResponse = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -95,7 +97,12 @@ Question: "${text}"`
                   role: 'user',
                   parts: [
                     {
-                      text: `Directly answer question: "${text}" in ${language} without any greetings or self-introduction.`
+                      text: `You are Rythu Sahaya, an expert agricultural AI advisor for farmers in Andhra Pradesh and India.
+Motto: Better Market. Best Price. Save Time.
+Respond strictly in language: ${targetLang}.
+CRITICAL INSTRUCTION: Give a direct, factual, practical, and concise answer to the farmer's question in 2-4 sentences or clear bullet points without greetings or self-introductions.
+
+Question: "${text}"`
                     }
                   ]
                 }
@@ -103,33 +110,32 @@ Question: "${text}"`
             })
           }
         );
-      }
 
-      if (response.ok) {
-        const data = await response.json();
-        let botReplyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Current mandi modal prices are steady across major AP yards.";
-        // Clean any residual self-introductions if returned by model
-        botReplyText = botReplyText.replace(/^I am Mandi Mitra AI[.,!]?\s*/i, '').replace(/^Namaste[.,!]?\s*/i, '');
-        
-        const botMsg: ChatMessage = {
-          id: (Date.now() + 1).toString(),
-          sender: 'bot',
-          text: botReplyText,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        };
-        setMessages((prev) => [...prev, botMsg]);
-      } else {
-        const fallbackText = getFallbackAnswer(text, language);
-        const botMsg: ChatMessage = {
-          id: (Date.now() + 1).toString(),
-          sender: 'bot',
-          text: fallbackText,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        };
-        setMessages((prev) => [...prev, botMsg]);
+        if (directResponse.ok) {
+          const directData = await directResponse.json();
+          botReplyText = directData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        }
+      } catch (directErr) {
+        console.warn('Direct Gemini call failed:', directErr);
       }
-    } catch (e) {
-      console.error(e);
+    }
+
+    // 3. Clean up and set message or fallback
+    if (botReplyText) {
+      botReplyText = botReplyText
+        .replace(/^I am Rythu Sahaya AI[.,!]?\s*/i, '')
+        .replace(/^I am Mandi Mitra AI[.,!]?\s*/i, '')
+        .replace(/^Namaste[.,!]?\s*/i, '')
+        .trim();
+
+      const botMsg: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        sender: 'bot',
+        text: botReplyText,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+      setMessages((prev) => [...prev, botMsg]);
+    } else {
       const fallbackText = getFallbackAnswer(text, language);
       const botMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -138,26 +144,26 @@ Question: "${text}"`
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages((prev) => [...prev, botMsg]);
-    } finally {
-      setLoading(false);
     }
+
+    setLoading(false);
   };
 
   const getFallbackAnswer = (query: string, lang: Language): string => {
     const q = query.toLowerCase();
     if (q.includes('tomato') || q.includes('టమోటా') || q.includes('टमाटर')) {
       return lang === 'te' 
-        ? "మదన్పల్లె మరియు అనంతపురం మండిలలో టమోటా ధర క్వింటాలుకు ₹1,850 - ₹1,950 గా ఉండి స్థిరంగా కొనసాగుతోంది."
-        : "Madanapalli and AP mandi Tomato modal prices are currently ₹1,850 - ₹1,950 per quintal.";
+        ? "మదనపల్లె మరియు అనంతపురం మండిలలో టమోటా మోడల్ ధర క్వింటాలుకు సుమారు ₹1,850 - ₹1,950 గా ఉండి స్థిరంగా కొనసాగుతోంది."
+        : "Madanapalle and AP mandi Tomato modal prices are currently around ₹1,850 - ₹1,950 per quintal.";
     }
-    if (q.includes('kisan') || q.includes(' scheme') || q.includes('పథకం')) {
+    if (q.includes('kisan') || q.includes('scheme') || q.includes('పథకం') || q.includes('sukhibhava') || q.includes('సుఖీభవ')) {
       return lang === 'te'
-        ? "PM-KISAN ద్వారా సంవత్సరానికి ₹6,000 మరియు AP YSR రైతు భరోసా ద్వారా ₹13,500 పెట్టుబడి సాయం లభిస్తుంది."
-        : "PM-KISAN provides ₹6,000/year and AP YSR Rythu Bharosa provides ₹13,500/year to eligible farmers.";
+        ? "పీఎం-కిసాన్ ద్వారా సంవత్సరానికి ₹6,000 మరియు ఆంధ్రప్రదేశ్ అన్నదాత సుఖీభవ పథకం ద్వారా ₹14,000 కలుపుకొని మొత్తం ₹20,000 పెట్టుబడి సాయం లభిస్తుంది."
+        : "Eligible farmers in AP receive ₹20,000 per year total financial aid under Annadata Sukhibhava (₹14,000 AP State) and PM-KISAN (₹6,000 Central).";
     }
     return lang === 'te'
-      ? "మండి ధరలు మరియు రాబోయే 3 రోజుల అంచనాల వివరాలు స్క్రీన్‌పై అందుబాటులో ఉన్నాయి."
-      : "Current mandi prices and 3-day forecasts are available on the dashboard.";
+      ? "రైతు సహాయ: మండి ధరల విశ్లేషణ, రాబోయే 3 రోజుల అంచనాలు మరియు పంట సంరక్షణ వివరాలు అందుబాటులో ఉన్నాయి."
+      : "Rythu Sahaya: Current verified mandi prices, 3-day ML forecasts, and crop disease diagnosis are available on the dashboard.";
   };
 
   return (
@@ -184,9 +190,9 @@ Question: "${text}"`
             zIndex: 9999,
             transition: 'transform 0.2s ease',
           }}
-          title={t.title}
+          title="Rythu Sahaya AI"
         >
-          <img src="/logo.jpg" alt="Logo" style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover' }} />
+          <img src="/logo.png" alt="Rythu Sahaya Logo" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
         </button>
       )}
 
@@ -215,13 +221,10 @@ Question: "${text}"`
           {/* Header */}
           <div style={{ background: 'linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%)', padding: '1rem 1.25rem', color: '#ffffff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <img src="/logo.jpg" alt="Mandi Mitra" style={{ width: '36px', height: '36px', borderRadius: '50%', border: '2px solid #ffffff' }} />
+              <img src="/logo.png" alt="Rythu Sahaya" style={{ width: '38px', height: '38px', borderRadius: '50%', border: '2px solid #ffffff', objectFit: 'cover' }} />
               <div>
-                <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff' }}>{t.title}</h4>
-                <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                  <Sparkles size={12} color="#fef3c7" />
-                  <span>Gemini NLP AI Active</span>
-                </div>
+                <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff', margin: 0 }}>Rythu Sahaya AI</h4>
+                <span style={{ fontSize: '0.72rem', opacity: 0.9, display: 'block' }}>Better Market. Best Price. Save Time.</span>
               </div>
             </div>
 
@@ -280,7 +283,7 @@ Question: "${text}"`
             {loading && (
               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
                 <RefreshCw size={14} className="spin" />
-                <span>Mandi Mitra AI is thinking...</span>
+                <span>Thinking...</span>
               </div>
             )}
 

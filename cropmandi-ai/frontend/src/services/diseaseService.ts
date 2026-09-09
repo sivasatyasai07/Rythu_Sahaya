@@ -129,10 +129,44 @@ export async function saveDiseaseHistoryToSupabase(
   }
 }
 
+async function getAuthUserId(): Promise<string | null> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user?.id) return user.id;
+  } catch {
+    // ignore
+  }
+
+  const token = localStorage.getItem('cropmandi_auth_token');
+  if (token) {
+    try {
+      const parts = token.split('.');
+      if (parts.length === 3) {
+        const decoded = JSON.parse(atob(parts[1]));
+        if (decoded.sub || decoded.id) return String(decoded.sub || decoded.id);
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  const storedUser = localStorage.getItem('cropmandi_user_cache');
+  if (storedUser) {
+    try {
+      const u = JSON.parse(storedUser);
+      if (u.id) return String(u.id);
+    } catch {
+      // ignore
+    }
+  }
+
+  return null;
+}
+
 /**
  * Main disease analysis endpoint
  * 1. Executes Gemini Vision analysis via FastAPI backend
- * 2. If user is authenticated, uploads image to Supabase Storage & saves to disease_history
+ * 2. If user is authenticated, saves diagnosis to history
  * 3. If guest / anonymous, returns result without saving to personal history
  */
 export async function analyzeCrop(
@@ -166,17 +200,58 @@ export async function analyzeCrop(
     headers: {
       'Content-Type': 'multipart/form-data',
     },
+    timeout: 300000,
     signal,
   });
 
   const responseData = res.data;
 
-  // 2. If user is logged in, upload to Supabase Storage and persist to disease_history
-  const { data: { user } } = await supabase.auth.getUser();
-  if (user && primaryFile && responseData) {
+  // 2. If user is logged in, persist to disease_history
+  const userId = await getAuthUserId();
+  if (userId && responseData) {
+    const resPayload = responseData.result;
+    const historyItem: DiseaseHistoryItem = {
+      analysis_id: responseData.analysis_id,
+      created_at: responseData.created_at || new Date().toISOString(),
+      detected_crop: resPayload.detected_crop || (typeof resPayload.crop === 'object' ? resPayload.crop?.name : resPayload.crop) || req.crop || 'Plant Leaf',
+      selected_crop: req.crop,
+      plant_part: req.plantPart || 'Leaf',
+      health_status: (typeof resPayload.health_status === 'object' ? (resPayload.health_status as any)?.status : resPayload.health_status) || 'healthy',
+      disease_status: resPayload.health_status,
+      language: req.language || 'en',
+      original_confidence: {
+        crop: resPayload.plantnet_score ?? 0.9,
+        primary_diagnosis: resPayload.plantnet_score ?? 0.9,
+      },
+      primary_diagnosis: {
+        name: (typeof resPayload.disease === 'object' ? resPayload.disease?.name : resPayload.disease) || resPayload.primary_diagnosis?.name || 'Healthy Plant',
+        confidence: resPayload.plantnet_score ?? 0.9,
+        evidence: resPayload.symptoms || [],
+      },
+      symptoms: resPayload.symptoms || [],
+      possible_causes: resPayload.possible_causes || [],
+      immediate_actions: resPayload.management || resPayload.immediate_actions || [],
+      prevention: resPayload.prevention || [],
+    };
+
+    // Save to user-scoped LocalStorage
     try {
-      const imageUrl = await uploadDiseaseImageToSupabase(primaryFile, user.id, responseData.analysis_id);
-      await saveDiseaseHistoryToSupabase(user.id, responseData.analysis_id, imageUrl, responseData, req);
+      const storageKey = `cropmandi_disease_history_${userId}`;
+      const existingRaw = localStorage.getItem(storageKey);
+      const existing: DiseaseHistoryItem[] = existingRaw ? JSON.parse(existingRaw) : [];
+      const updated = [historyItem, ...existing.filter((item) => item.analysis_id !== historyItem.analysis_id)].slice(0, 100);
+      localStorage.setItem(storageKey, JSON.stringify(updated));
+    } catch (lsErr) {
+      console.warn('LocalStorage save failed:', lsErr);
+    }
+
+    // Save to Supabase Storage & Database
+    try {
+      let imageUrl: string | null = null;
+      if (primaryFile) {
+        imageUrl = await uploadDiseaseImageToSupabase(primaryFile, userId, responseData.analysis_id);
+      }
+      await saveDiseaseHistoryToSupabase(userId, responseData.analysis_id, imageUrl, responseData, req);
     } catch (saveErr) {
       console.warn('Background Supabase persistence skipped:', saveErr);
     }
@@ -186,22 +261,34 @@ export async function analyzeCrop(
 }
 
 /**
- * Fetch disease history from Supabase disease_history table (with backend fallback)
+ * Fetch disease history from LocalStorage, Supabase, and FastAPI backend
  */
 export async function fetchDiseaseHistory(
   filter?: DiseaseHistoryFilter,
   signal?: AbortSignal
 ): Promise<DiseaseHistoryListResponse> {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
+  const userId = await getAuthUserId();
+  if (!userId) {
     return { analyses: [], total_count: 0, user_id: '' };
   }
 
+  let localItems: DiseaseHistoryItem[] = [];
+  try {
+    const storageKey = `cropmandi_disease_history_${userId}`;
+    const existingRaw = localStorage.getItem(storageKey);
+    if (existingRaw) {
+      localItems = JSON.parse(existingRaw);
+    }
+  } catch (err) {
+    console.warn('Error reading local disease history:', err);
+  }
+
+  let supabaseItems: DiseaseHistoryItem[] = [];
   try {
     let query = supabase
       .from('disease_history')
       .select('*', { count: 'exact' })
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
     if (filter?.crop) {
@@ -214,10 +301,10 @@ export async function fetchDiseaseHistory(
       query = query.limit(filter.limit);
     }
 
-    const { data, count, error } = await query;
+    const { data, error } = await query;
 
     if (!error && data) {
-      const items: DiseaseHistoryItem[] = data.map((row: any) => ({
+      supabaseItems = data.map((row: any) => ({
         analysis_id: row.id,
         created_at: row.created_at,
         detected_crop: row.crop || 'Plant Leaf',
@@ -230,7 +317,6 @@ export async function fetchDiseaseHistory(
         language: row.language || 'en',
         original_confidence: {
           crop: row.confidence,
-          health_status: row.confidence,
           primary_diagnosis: row.confidence,
         },
         primary_diagnosis: {
@@ -243,27 +329,41 @@ export async function fetchDiseaseHistory(
         immediate_actions: Array.isArray(row.management) ? row.management : [],
         prevention: Array.isArray(row.prevention) ? row.prevention : [],
       }));
-
-      return {
-        analyses: items,
-        total_count: count || items.length,
-        user_id: user.id,
-      };
     }
   } catch (supabaseErr) {
-    console.warn('Supabase disease_history query failed, falling back to API:', supabaseErr);
+    console.warn('Supabase disease_history query failed:', supabaseErr);
   }
 
-  // Fallback to FastAPI backend history if Supabase query wasn't available
+  let backendItems: DiseaseHistoryItem[] = [];
   try {
     const res = await api.get<DiseaseHistoryListResponse>('/disease/history', {
       params: filter,
       signal,
     });
-    return res.data;
+    if (res.data?.analyses) {
+      backendItems = res.data.analyses;
+    }
   } catch {
-    return { analyses: [], total_count: 0, user_id: user.id };
+    // ignore
   }
+
+  // Merge and deduplicate all records
+  const itemMap = new Map<string, DiseaseHistoryItem>();
+  for (const item of [...localItems, ...supabaseItems, ...backendItems]) {
+    if (item.analysis_id && !itemMap.has(item.analysis_id)) {
+      itemMap.set(item.analysis_id, item);
+    }
+  }
+
+  const merged = Array.from(itemMap.values()).sort(
+    (a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
+  );
+
+  return {
+    analyses: filter?.limit ? merged.slice(0, filter.limit) : merged,
+    total_count: merged.length,
+    user_id: userId,
+  };
 }
 
 /**

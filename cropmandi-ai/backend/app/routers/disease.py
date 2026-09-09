@@ -63,7 +63,15 @@ def get_optional_auth_user(
         payload = decode_access_token(token_str)
         if not payload or "sub" not in payload:
             return None
-        return find_user_by_id(payload["sub"])
+        user = find_user_by_id(payload["sub"])
+        if user:
+            return user
+        return {
+            "id": str(payload["sub"]),
+            "email": payload.get("email", ""),
+            "role": payload.get("role", "farmer"),
+            "is_active": True,
+        }
     except Exception as exc:
         logger.debug("Optional user auth decode failed: %s", exc)
         return None

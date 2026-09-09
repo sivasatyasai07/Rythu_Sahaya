@@ -155,6 +155,11 @@ export interface TranslationDictionary {
     unavailable: string;
   };
   schemes: {
+    headerTag: string;
+    allSchemes: string;
+    centralGovt: string;
+    andhraPradesh: string;
+    insurance: string;
     title: string;
     subtitle: string;
     visitOfficialWebsite: string;
@@ -244,8 +249,8 @@ export interface TranslationDictionary {
 export const translations: Record<Language, TranslationDictionary> = {
   en: {
     common: {
-      appTitle: "Mandi Price Prediction",
-      appSubtitle: "AI-Powered Mandi Price Forecast & Advisory • Andhra Pradesh",
+      appTitle: "Rythu Sahaya",
+      appSubtitle: "Better Market. Best Price. Save Time. • Andhra Pradesh",
       login: "Log In",
       signUp: "Sign Up",
       logout: "Log Out",
@@ -403,6 +408,11 @@ export const translations: Record<Language, TranslationDictionary> = {
       unavailable: "Weather data unavailable for this market"
     },
     schemes: {
+      headerTag: "OFFICIAL WELFARE & FINANCIAL SCHEMES",
+      allSchemes: "All Schemes",
+      centralGovt: "Central Govt",
+      andhraPradesh: "Andhra Pradesh",
+      insurance: "Crop Insurance",
       title: "Government Agricultural Schemes",
       subtitle: "Official central & state financial assistance, crop insurance, and market welfare for farmers",
       visitOfficialWebsite: "Visit Official Portal",
@@ -476,24 +486,24 @@ export const translations: Record<Language, TranslationDictionary> = {
       fallbackUsed: "A fallback baseline estimate was used because model inference was unavailable."
     },
     chatbot: {
-      title: "CropMandi AI Farmer Assistant",
-      subtitle: "Ask in English, Telugu, Hindi, Malayalam, or Tamil about market rates, crop diseases, and schemes",
-      placeholder: "Ask a question about prices, mandi trends, diseases...",
+      title: "Rythu Sahaya AI",
+      subtitle: "Better Market. Best Price. Save Time. • Agricultural Assistant",
+      placeholder: "Ask Rythu Sahaya about prices, mandi trends, diseases, schemes...",
       send: "Send",
-      welcomeMsg: "Namaste! I am your CropMandi AI Assistant. How can I help you today?",
+      welcomeMsg: "Namaste! I am Rythu Sahaya AI. How can I assist you with market prices, crop health, or farming schemes today?",
       quickPrompts: [
         "What is the latest tomato price in Madanapalle?",
         "Should I sell or hold my chili harvest?",
         "How to prevent leaf spot disease in cotton?",
-        "Tell me about PM-KISAN scheme eligibility."
+        "Tell me about PM-KISAN / Annadata Sukhibhava scheme eligibility."
       ]
     }
   },
 
   te: {
     common: {
-      appTitle: "మార్కెట్ ధరల అంచనా",
-      appSubtitle: "ఆంధ్రప్రదేశ్ రైతుల కోసం AI ఆధారిత మార్కెట్ ధరల అంచనా & సలహా",
+      appTitle: "రైతు సహాయ (Rythu Sahaya)",
+      appSubtitle: "మంచి మార్కెట్ • ఉత్తమ ధర • సమయం ఆదా (Better Market. Best Price. Save Time.)",
       login: "లాగిన్",
       signUp: "సైన్ అప్",
       logout: "లాగ్ అవుట్",
@@ -651,6 +661,11 @@ export const translations: Record<Language, TranslationDictionary> = {
       unavailable: "ఈ మార్కెట్‌కు వాతావరణ డేటా అందుబాటులో లేదు"
     },
     schemes: {
+      headerTag: "అధికారిక సంక్షేమ & ఆర్థిక సహాయ పథకాలు",
+      allSchemes: "అన్ని పథకాలు",
+      centralGovt: "కేంద్ర ప్రభుత్వం",
+      andhraPradesh: "ఆంధ్రప్రదేశ్",
+      insurance: "పంట బీమా",
       title: "ప్రభుత్వ వ్యవసాయ పథకాలు",
       subtitle: "రైతుల కోసం కేంద్ర మరియు రాష్ట్ర ప్రభుత్వ ఆర్థిక సహాయం, పంట బీమా పథకాలు",
       visitOfficialWebsite: "అధికారిక వెబ్‌సైట్ చూడండి",
@@ -724,24 +739,24 @@ export const translations: Record<Language, TranslationDictionary> = {
       fallbackUsed: "మోడల్ అందుబాటులో లేనందున బేస్‌లైన్ ధర ఉపయోగించబడింది."
     },
     chatbot: {
-      title: "రైతు సహాయక AI చాట్‌బాట్",
-      subtitle: "మార్కెట్ ధరలు, పంట తెగుళ్లు మరియు ప్రభుత్వ పథకాల గురించి తెలుగులో అడగండి",
-      placeholder: "ధరలు లేదా పంటల గురించి ఏదైనా అడగండి...",
+      title: "రైతు సహాయ (Rythu Sahaya) AI",
+      subtitle: "మంచి మార్కెట్ • ఉత్తమ ధర • సమయం ఆదా • మార్కెట్ ధరలు, పంట తెగుళ్లు మరియు పథకాలు",
+      placeholder: "రైతు సహాయను ఏదైనా అడగండి...",
       send: "పంపు",
-      welcomeMsg: "నమస్కారం! నేను మీ CropMandi AI సహాయకుడిని. ఈరోజు మీకు ఎలా సహాయపడగలను?",
+      welcomeMsg: "నమస్కారం! నేను మీ రైతు సహాయ (Rythu Sahaya) AI సహాయకుడిని. ఈరోజు మీకు ఎలా సహాయపడగలను?",
       quickPrompts: [
         "మదనపల్లెలో తాజా టమోటా ధర ఎంత?",
         "మిరప పంటను ఇప్పుడు అమ్మాలా లేదా నిల్వ చేయాలా?",
         "పత్తిలో ఆకుమచ్చ తెగులు నివారణ ఎలా?",
-        "పీఎం కిసాన్ పథకం అర్హతలు ఏమిటి?"
+        "అన్నదాత సుఖీభవ / పీఎం కిసాన్ పథకం అర్హతలు ఏమిటి?"
       ]
     }
   },
 
   hi: {
     common: {
-      appTitle: "मंडी मूल्य भविष्यवाणी",
-      appSubtitle: "आंध्र प्रदेश के किसानों के लिए AI-आधारित मंडी मूल्य पूर्वानुमान और सलाह",
+      appTitle: "रैतु सहाय (Rythu Sahaya)",
+      appSubtitle: "बेहतर बाज़ार • सर्वोत्तम मूल्य • समय की बचत (Better Market. Best Price. Save Time.)",
       login: "लॉग इन",
       signUp: "साइन अप",
       logout: "लॉग आउट",
@@ -899,6 +914,11 @@ export const translations: Record<Language, TranslationDictionary> = {
       unavailable: "इस मंडी के लिए मौसम डेटा उपलब्ध नहीं है"
     },
     schemes: {
+      headerTag: "आधिकारिक कल्याण एवं वित्तीय योजनाएं",
+      allSchemes: "सभी योजनाएं",
+      centralGovt: "केंद्र सरकार",
+      andhraPradesh: "आंध्र प्रदेश",
+      insurance: "फसल बीमा",
       title: "सरकारी कृषि योजनाएं",
       subtitle: "किसानों के लिए आधिकारिक केंद्रीय और राज्य वित्तीय सहायता एवं फसल बीमा योजनाएं",
       visitOfficialWebsite: "आधिकारिक पोर्टल पर जाएं",
@@ -972,11 +992,11 @@ export const translations: Record<Language, TranslationDictionary> = {
       fallbackUsed: "मॉडल उपलब्ध न होने पर बेसलाइन मूल्य उपयोग किया गया।"
     },
     chatbot: {
-      title: "किसान सहायक AI चैटबॉट",
-      subtitle: "मंडी भाव, फसल रोग और सरकारी योजनाओं के बारे में हिंदी में पूछें",
-      placeholder: "भाव, रुझान या रोग के बारे में पूछें...",
+      title: "रैतु सहाय (Rythu Sahaya) AI",
+      subtitle: "बेहतर बाज़ार • सर्वोत्तम मूल्य • समय की बचत • कृषि सहायक",
+      placeholder: "रैतु सहाय से मंडी भाव या फसल रोग के बारे में पूछें...",
       send: "भेजें",
-      welcomeMsg: "नमस्ते! मैं आपका CropMandi AI सहायक हूँ। आज मैं आपकी क्या मदद कर सकता हूँ?",
+      welcomeMsg: "नमस्ते! मैं आपका रैतु सहाय (Rythu Sahaya) AI सहायक हूँ। आज मैं आपकी क्या मदद कर सकता हूँ?",
       quickPrompts: [
         "मदनापल्ले में टमाटर का ताज़ा भाव क्या है?",
         "क्या मुझे मिर्च बेचनी चाहिए या रोकनी चाहिए?",
@@ -988,8 +1008,8 @@ export const translations: Record<Language, TranslationDictionary> = {
 
   ml: {
     common: {
-      appTitle: "വിപണി വില പ്രവചനം",
-      appSubtitle: "ആന്ധ്രാപ്രദേശ് കർഷകർക്കായി AI അധിഷ്ഠിത മാർക്കറ്റ് വില പ്രവചനവും ഉപദേശവും",
+      appTitle: "റൈതു സഹായ (Rythu Sahaya)",
+      appSubtitle: "നല്ല വിപണി • മികച്ച വില • സമയം ലാഭിക്കൂ (Better Market. Best Price. Save Time.)",
       login: "ലോഗിൻ",
       signUp: "സൈൻ അപ്പ്",
       logout: "ലോഗ് ഔട്ട്",
@@ -1147,6 +1167,11 @@ export const translations: Record<Language, TranslationDictionary> = {
       unavailable: "കാലാവസ്ഥാ വിവരങ്ങൾ ലഭ്യമല്ല"
     },
     schemes: {
+      headerTag: "ഔദ്യോഗിക ക്ഷേമ & സാമ്പത്തിക പദ്ധതികൾ",
+      allSchemes: "എല്ലാ പദ്ധതികളും",
+      centralGovt: "കേന്ദ്ര സർക്കാർ",
+      andhraPradesh: "ആന്ധ്രപ്രദേശ്",
+      insurance: "വിള ഇൻഷുറൻസ്",
       title: "സർക്കാർ കാർഷിക പദ്ധതികൾ",
       subtitle: "കർഷകർക്കായുള്ള കേന്ദ്ര-സംസ്ഥാന സാമ്പത്തിക സഹായങ്ങളും ഇൻഷുറൻസും",
       visitOfficialWebsite: "ഔദ്യോഗിക പോർട്ടൽ സന്ദർശിക്കുക",
@@ -1220,11 +1245,11 @@ export const translations: Record<Language, TranslationDictionary> = {
       fallbackUsed: "ബേസ്‌ലൈൻ വില ഉപയോഗിച്ചു."
     },
     chatbot: {
-      title: "കർഷക സഹായി AI ചാറ്റ്ബോട്ട്",
-      subtitle: "മാർക്കറ്റ് വിലകളെയും രോഗങ്ങളെയും കുറിച്ച് ചോദിക്കുക",
-      placeholder: "ചോദ്യങ്ങൾ ചോദിക്കുക...",
+      title: "റൈതു സഹായ (Rythu Sahaya) AI",
+      subtitle: "നല്ല വിപണി • മികച്ച വില • സമയം ലാഭിക്കൂ • കർഷക സഹായി",
+      placeholder: "റൈതു സഹായയോട് ചോദ്യങ്ങൾ ചോദിക്കുക...",
       send: "അയക്കുക",
-      welcomeMsg: "നമസ്കാരം! ഞാൻ നിങ്ങളുടെ CropMandi AI സഹായിയാണ്. എനിക്ക് എങ്ങനെ സഹായിക്കാനാകും?",
+      welcomeMsg: "നമസ്കാരം! ഞാൻ നിങ്ങളുടെ റൈതു സഹായ (Rythu Sahaya) AI സഹായിയാണ്. എനിക്ക് എങ്ങനെ സഹായിക്കാനാകും?",
       quickPrompts: [
         "മദനപ്പള്ളിയിലെ തക്കാളി വില എത്ര?",
         "മുളക് ഇപ്പോൾ വിൽക്കണമോ?",
@@ -1236,8 +1261,8 @@ export const translations: Record<Language, TranslationDictionary> = {
 
   ta: {
     common: {
-      appTitle: "மண்டி விலை கணிப்பு",
-      appSubtitle: "ஆந்திரப் பிரதேச விவசாயிகளுக்கான AI அடிப்படையிலான மண்டி விலை கணிப்பு மற்றும் ஆலோசனை",
+      appTitle: "ரைத்து சகாய (Rythu Sahaya)",
+      appSubtitle: "சிறந்த சந்தை • சிறந்த விலை • நேர சேமிப்பு (Better Market. Best Price. Save Time.)",
       login: "உள்நுழை",
       signUp: "பதிவு செய்",
       logout: "வெளியேறு",
@@ -1395,6 +1420,11 @@ export const translations: Record<Language, TranslationDictionary> = {
       unavailable: "வானிலை தரவு கிடைக்கவில்லை"
     },
     schemes: {
+      headerTag: "அதிகாரப்பூர்வ நலன்புரி & நிதி திட்டங்கள்",
+      allSchemes: "அனைத்து திட்டங்கள்",
+      centralGovt: "மத்திய அரசு",
+      andhraPradesh: "ஆந்திரப் பிரதேசம்",
+      insurance: "பயிர் காப்பீடு",
       title: "அரசு விவசாய திட்டங்கள்",
       subtitle: "விவசாயிகளுக்கான மத்திய மற்றும் மாநில அரசு நிதி உதவிகள் மற்றும் பயிர் காப்பீட்டுத் திட்டங்கள்",
       visitOfficialWebsite: "அதிகாரப்பூர்வ தளத்தைப் பார்வையிடவும்",
@@ -1468,11 +1498,11 @@ export const translations: Record<Language, TranslationDictionary> = {
       fallbackUsed: "அடிப்படை விலை பயன்படுத்தப்பட்டது."
     },
     chatbot: {
-      title: "விவசாயி உதவியாளர் AI சாட்பாட்",
-      subtitle: "மண்டி விலைகள், நோய்கள் மற்றும் திட்டங்கள் குறித்து தமிழில் கேளுங்கள்",
-      placeholder: "விலைகள் அல்லது பயிர்கள் பற்றி கேளுங்கள்...",
+      title: "ரைத்து சகாய (Rythu Sahaya) AI",
+      subtitle: "சிறந்த சந்தை • சிறந்த விலை • நேர சேமிப்பு • விவசாயி உதவியாளர்",
+      placeholder: "ரைத்து சகாயவிடம் கேளுங்கள்...",
       send: "அனுப்பு",
-      welcomeMsg: "வணக்கம்! நான் உங்கள் CropMandi AI உதவியாளர். இன்று நான் உங்களுக்கு எவ்வாறு உதவ முடியும்?",
+      welcomeMsg: "வணக்கம்! நான் உங்கள் ரைத்து சகாய (Rythu Sahaya) AI உதவியாளர். இன்று நான் உங்களுக்கு எவ்வாறு உதவ முடியும்?",
       quickPrompts: [
         "மதனப்பள்ளியில் தக்காளி விலை என்ன?",
         "மிளகாயை இப்போது விற்க வேண்டுமா?",

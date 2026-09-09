@@ -10,6 +10,7 @@ export const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 300000, // 5 minutes timeout for ML inference and botanical vision analysis
 });
 
 api.interceptors.request.use((config) => {

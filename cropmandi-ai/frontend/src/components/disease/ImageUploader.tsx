@@ -1,5 +1,5 @@
-import React, { useState, useRef, useCallback } from 'react';
-import { Upload, Camera, AlertCircle, Plus, X } from 'lucide-react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { Upload, Camera, AlertCircle, Plus, X, RotateCcw, Check, RefreshCw } from 'lucide-react';
 import type { Language } from '../../i18n/translations';
 import { getDiseaseI18n } from '../../utils/i18nDisease';
 
@@ -27,8 +27,18 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   const [dragActive, setDragActive] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Native input refs
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Live Camera state
+  const [cameraModalOpen, setCameraModalOpen] = useState<boolean>(false);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
+  const [capturedDataUrl, setCapturedDataUrl] = useState<string | null>(null);
+  const [cameraLoading, setCameraLoading] = useState<boolean>(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const allFiles = selectedFiles.length > 0 ? selectedFiles : (selectedFile ? [selectedFile] : []);
 
@@ -62,6 +72,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
   }, [allFiles, onFileSelect, onFilesSelect, dI18n.maxFilesWarning]);
 
+  // Handle Drag & Drop
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -87,6 +98,8 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     if (e.target.files && e.target.files.length > 0) {
       validateAndAddFiles(e.target.files);
     }
+    // reset input value so re-taking with the same filename works
+    e.target.value = '';
   };
 
   const handleRemoveIndex = (index: number) => {
@@ -101,6 +114,111 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     setErrorMessage(null);
   };
 
+  // --- Live Camera Functions ---
+  const startCamera = async (mode: 'environment' | 'user' = 'environment') => {
+    if (disabled) return;
+    setErrorMessage(null);
+    setCapturedDataUrl(null);
+    setFacingMode(mode);
+    setCameraLoading(true);
+
+    // Stop previous stream
+    if (cameraStream) {
+      cameraStream.getTracks().forEach((track) => track.stop());
+      setCameraStream(null);
+    }
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      // Fallback to native capture input if WebRTC camera is unavailable
+      setCameraLoading(false);
+      if (cameraInputRef.current) cameraInputRef.current.click();
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: mode },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+        },
+        audio: false,
+      });
+
+      setCameraStream(stream);
+      setCameraModalOpen(true);
+      setCameraLoading(false);
+    } catch (err: any) {
+      console.warn('[CAMERA] Direct stream failed, falling back to native device camera:', err);
+      setCameraLoading(false);
+      setCameraModalOpen(false);
+      // Fallback immediately to native camera capture input
+      if (cameraInputRef.current) {
+        cameraInputRef.current.click();
+      }
+    }
+  };
+
+  const stopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach((track) => track.stop());
+      setCameraStream(null);
+    }
+    setCameraModalOpen(false);
+    setCapturedDataUrl(null);
+  };
+
+  const captureSnapshot = () => {
+    if (!videoRef.current) return;
+    const video = videoRef.current;
+    const canvas = canvasRef.current || document.createElement('canvas');
+    canvas.width = video.videoWidth || 1280;
+    canvas.height = video.videoHeight || 720;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+      setCapturedDataUrl(dataUrl);
+    }
+  };
+
+  const confirmCapturedPhoto = () => {
+    if (!capturedDataUrl) return;
+    fetch(capturedDataUrl)
+      .then((res) => res.blob())
+      .then((blob) => {
+        const file = new File([blob], `crop_photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
+        validateAndAddFiles([file]);
+        stopCamera();
+      })
+      .catch((err) => {
+        console.error('Error creating photo file:', err);
+        stopCamera();
+      });
+  };
+
+  const toggleFacingMode = () => {
+    const nextMode = facingMode === 'environment' ? 'user' : 'environment';
+    startCamera(nextMode);
+  };
+
+  // Attach stream to video tag
+  useEffect(() => {
+    if (cameraModalOpen && cameraStream && videoRef.current) {
+      videoRef.current.srcObject = cameraStream;
+      videoRef.current.play().catch(console.error);
+    }
+  }, [cameraModalOpen, cameraStream]);
+
+  // Clean up stream on unmount
+  useEffect(() => {
+    return () => {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, [cameraStream]);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
       
@@ -108,7 +226,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp"
+        accept="image/jpeg,image/png,image/webp,image/*"
         multiple
         style={{ display: 'none' }}
         onChange={handleFileChange}
@@ -117,14 +235,14 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
       <input
         ref={cameraInputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp"
+        accept="image/*"
         capture="environment"
         style={{ display: 'none' }}
         onChange={handleFileChange}
         disabled={disabled}
       />
 
-      {/* Main Upload Dropzone */}
+      {/* Main Upload / Camera Launch Area */}
       {allFiles.length === 0 ? (
         <div
           onDragEnter={handleDrag}
@@ -141,13 +259,13 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
             transition: 'all 0.2s ease',
           }}
           onClick={() => {
-            if (!disabled && fileInputRef.current) fileInputRef.current.click();
+            if (!disabled) startCamera('environment');
           }}
         >
           <div
             style={{
-              width: '64px',
-              height: '64px',
+              width: '68px',
+              height: '68px',
               borderRadius: '50%',
               background: '#dcfce7',
               display: 'inline-flex',
@@ -155,13 +273,14 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
               justifyContent: 'center',
               marginBottom: '1rem',
               color: '#16a34a',
+              boxShadow: '0 4px 12px rgba(22, 163, 74, 0.15)',
             }}
           >
-            <Upload size={30} strokeWidth={2.2} />
+            <Camera size={34} strokeWidth={2.2} />
           </div>
 
-          <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.35rem 0' }}>
-            {dI18n.uploadTitle}
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.35rem 0' }}>
+            Click to Open Camera or Take Photo
           </h3>
 
           <p style={{ fontSize: '0.88rem', color: '#64748b', margin: '0 0 1.25rem 0' }}>
@@ -175,23 +294,22 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '0.45rem',
-                padding: '0.65rem 1.25rem',
+                gap: '0.5rem',
+                padding: '0.75rem 1.4rem',
                 borderRadius: '10px',
-                fontSize: '0.88rem',
+                fontSize: '0.92rem',
                 fontWeight: 700,
                 background: '#16a34a',
                 color: '#ffffff',
                 border: 'none',
                 cursor: 'pointer',
+                boxShadow: '0 4px 10px rgba(22, 163, 74, 0.25)',
               }}
-              onClick={() => {
-                if (fileInputRef.current) fileInputRef.current.click();
-              }}
-              disabled={disabled}
+              onClick={() => startCamera('environment')}
+              disabled={disabled || cameraLoading}
             >
-              <Upload size={17} />
-              <span>{dI18n.browseFiles}</span>
+              <Camera size={18} />
+              <span>{cameraLoading ? 'Opening Camera...' : `${dI18n.takePhoto} (Open Camera)`}</span>
             </button>
 
             <button
@@ -200,10 +318,10 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '0.45rem',
-                padding: '0.65rem 1.25rem',
+                gap: '0.5rem',
+                padding: '0.75rem 1.4rem',
                 borderRadius: '10px',
-                fontSize: '0.88rem',
+                fontSize: '0.92rem',
                 fontWeight: 700,
                 background: '#ffffff',
                 color: '#334155',
@@ -211,17 +329,17 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                 cursor: 'pointer',
               }}
               onClick={() => {
-                if (cameraInputRef.current) cameraInputRef.current.click();
+                if (fileInputRef.current) fileInputRef.current.click();
               }}
               disabled={disabled}
             >
-              <Camera size={17} />
-              <span>{dI18n.takePhoto}</span>
+              <Upload size={18} />
+              <span>{dI18n.browseFiles}</span>
             </button>
           </div>
 
           <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '1rem' }}>
-            {dI18n.supportedFormatsText}
+            {dI18n.supportedFormatsText} • Direct live camera viewfinder & capture supported
           </div>
         </div>
       ) : (
@@ -293,9 +411,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
 
             {allFiles.length < 3 && !disabled && (
               <div
-                onClick={() => {
-                  if (fileInputRef.current) fileInputRef.current.click();
-                }}
+                onClick={() => startCamera('environment')}
                 style={{
                   border: '2px dashed #cbd5e1',
                   borderRadius: '12px',
@@ -312,8 +428,8 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                 }}
               >
                 <Plus size={24} color="#16a34a" />
-                <span style={{ fontSize: '0.82rem', fontWeight: 700, marginTop: '0.35rem' }}>Add Another Angle</span>
-                <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Max 3 photos</span>
+                <span style={{ fontSize: '0.82rem', fontWeight: 700, marginTop: '0.35rem' }}>Add Another Photo</span>
+                <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Open camera or upload</span>
               </div>
             )}
           </div>
@@ -338,6 +454,236 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
         >
           <AlertCircle size={17} />
           <span>{errorMessage}</span>
+        </div>
+      )}
+
+      {/* --- LIVE CAMERA MODAL VIEW --- */}
+      {cameraModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.85)',
+            zIndex: 1000,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+          }}
+          onClick={stopCamera}
+        >
+          <div
+            style={{
+              position: 'relative',
+              background: '#0f172a',
+              borderRadius: '20px',
+              overflow: 'hidden',
+              maxWidth: '680px',
+              width: '100%',
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header / Controls */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '1rem 1.25rem',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                color: '#ffffff',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700 }}>
+                <Camera size={20} color="#22c55e" />
+                <span>Camera Viewfinder</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <button
+                  type="button"
+                  onClick={toggleFacingMode}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.15)',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: '#ffffff',
+                    padding: '0.45rem 0.75rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                  }}
+                  title="Flip camera (front / back)"
+                >
+                  <RefreshCw size={15} />
+                  <span>Flip Camera</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={stopCamera}
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.2)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    color: '#ef4444',
+                    width: '32px',
+                    height: '32px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                  title="Close Camera"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Video Feed / Snapshot View */}
+            <div
+              style={{
+                position: 'relative',
+                width: '100%',
+                background: '#000000',
+                aspectRatio: '4/3',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+              }}
+            >
+              {capturedDataUrl ? (
+                <img
+                  src={capturedDataUrl}
+                  alt="Captured Crop"
+                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                />
+              ) : (
+                <>
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                  {/* Framing Overlay */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '12%',
+                      left: '12%',
+                      right: '12%',
+                      bottom: '12%',
+                      border: '2px dashed rgba(255, 255, 255, 0.5)',
+                      borderRadius: '16px',
+                      pointerEvents: 'none',
+                    }}
+                  />
+                </>
+              )}
+              <canvas ref={canvasRef} style={{ display: 'none' }} />
+            </div>
+
+            {/* Shutter / Action Controls */}
+            <div
+              style={{
+                padding: '1.25rem',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '1.5rem',
+                background: '#0f172a',
+              }}
+            >
+              {capturedDataUrl ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setCapturedDataUrl(null)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.45rem',
+                      background: 'rgba(255, 255, 255, 0.12)',
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '0.7rem 1.4rem',
+                      borderRadius: '12px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      fontSize: '0.9rem',
+                    }}
+                  >
+                    <RotateCcw size={16} />
+                    <span>Retake</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={confirmCapturedPhoto}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.45rem',
+                      background: '#16a34a',
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '0.7rem 1.6rem',
+                      borderRadius: '12px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      fontSize: '0.9rem',
+                      boxShadow: '0 4px 14px rgba(22, 163, 74, 0.4)',
+                    }}
+                  >
+                    <Check size={18} />
+                    <span>Use Photo</span>
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={captureSnapshot}
+                  style={{
+                    width: '64px',
+                    height: '64px',
+                    borderRadius: '50%',
+                    background: '#ffffff',
+                    border: '4px solid #22c55e',
+                    boxShadow: '0 0 20px rgba(34, 197, 94, 0.6)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'transform 0.1s ease',
+                  }}
+                  onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.92)')}
+                  onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+                  title="Capture Photo"
+                >
+                  <div
+                    style={{
+                      width: '46px',
+                      height: '46px',
+                      borderRadius: '50%',
+                      background: '#22c55e',
+                    }}
+                  />
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       )}
 

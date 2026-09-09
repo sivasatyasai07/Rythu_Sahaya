@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { PasswordInput } from './PasswordInput';
-import { LogIn, AlertCircle, CheckCircle2, KeyRound } from 'lucide-react';
+import { LogIn, AlertCircle, CheckCircle2, KeyRound, Mail, RefreshCw } from 'lucide-react';
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -9,11 +9,14 @@ interface LoginFormProps {
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToSignup }) => {
-  const { login, resetPassword } = useAuth();
+  const { login, resetPassword, resendVerificationEmail } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isUnconfirmedEmail, setIsUnconfirmedEmail] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -26,6 +29,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToSignu
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
+    setIsUnconfirmedEmail(false);
+    setResendSuccess(null);
     setEmailError(null);
     setPasswordError(null);
     setSuccessMsg(null);
@@ -59,12 +64,31 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToSignu
       let serverMsg = err.message || 'Incorrect email or password.';
       if (serverMsg.includes('Invalid login credentials')) {
         serverMsg = 'Invalid email or password. Please check your credentials.';
-      } else if (serverMsg.includes('Email not confirmed')) {
+      } else if (serverMsg.toLowerCase().includes('email not confirmed') || serverMsg.toLowerCase().includes('not confirmed')) {
         serverMsg = 'Your email is not confirmed. Please check your inbox for verification link.';
+        setIsUnconfirmedEmail(true);
       }
       setErrorMsg(serverMsg);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail) {
+      setEmailError('Please enter your email above.');
+      return;
+    }
+    setResendLoading(true);
+    setResendSuccess(null);
+    try {
+      await resendVerificationEmail(cleanEmail);
+      setResendSuccess('Verification link resent! Please check your inbox and spam folder.');
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Failed to resend verification email.');
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -233,13 +257,81 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToSignu
   return (
     <form onSubmit={handleSubmit} noValidate style={{ width: '100%' }}>
       <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--primary-dark)', marginBottom: '0.25rem' }}>
-        Welcome Back to CropMandi AI
+        Welcome Back to Rythu Sahaya
       </h3>
       <p style={{ fontSize: '0.88rem', color: '#64748b', marginBottom: '1.25rem' }}>
         Log in to access your farmer market insights & price forecasts.
       </p>
 
-      {errorMsg && (
+      {isUnconfirmedEmail ? (
+        <div
+          style={{
+            padding: '1rem',
+            borderRadius: '10px',
+            backgroundColor: '#fffbeb',
+            border: '1px solid #fcd34d',
+            color: '#92400e',
+            fontSize: '0.88rem',
+            marginBottom: '1.2rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.6rem',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+            <Mail size={20} style={{ flexShrink: 0, marginTop: '2px', color: '#d97706' }} />
+            <div>
+              <div style={{ fontWeight: 700, fontSize: '0.92rem', marginBottom: '0.2rem' }}>
+                Email Verification Required
+              </div>
+              <div style={{ lineHeight: '1.4' }}>
+                Your account was created, but your email has not been confirmed yet. Please check your email inbox and <strong>Spam / Junk</strong> folder for the verification link.
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.25rem' }}>
+            <button
+              type="button"
+              onClick={handleResendVerification}
+              disabled={resendLoading}
+              style={{
+                backgroundColor: '#d97706',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '0.4rem 0.8rem',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                cursor: resendLoading ? 'not-allowed' : 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                transition: 'opacity 0.2s',
+              }}
+            >
+              <RefreshCw size={14} className={resendLoading ? 'animate-spin' : ''} />
+              <span>{resendLoading ? 'Resending...' : 'Resend Verification Link'}</span>
+            </button>
+          </div>
+
+          {resendSuccess && (
+            <div
+              style={{
+                color: '#059669',
+                fontWeight: 600,
+                fontSize: '0.82rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+              }}
+            >
+              <CheckCircle2 size={16} />
+              <span>{resendSuccess}</span>
+            </div>
+          )}
+        </div>
+      ) : errorMsg ? (
         <div
           style={{
             padding: '0.75rem 1rem',
@@ -258,7 +350,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToSignu
           <AlertCircle size={18} style={{ flexShrink: 0 }} />
           <span>{errorMsg}</span>
         </div>
-      )}
+      ) : null}
 
       {successMsg && (
         <div
