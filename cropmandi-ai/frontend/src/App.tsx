@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { Language } from './i18n/translations';
 import { AuthProvider } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
+import { MobileBottomNav } from './components/MobileBottomNav';
 import { FarmerForecastTab } from './components/FarmerForecastTab';
 import { PriceTrendsTab } from './components/PriceTrendsTab';
 import { CropDiseaseTab } from './components/CropDiseaseTab';
@@ -67,6 +68,13 @@ export function App() {
 
         {/* Floating Mandi Mitra AI Chatbot */}
         <MandiMitraChatbot language={language} />
+
+        {/* Mobile Fixed Bottom Navigation Bar (Phones/Tablets) */}
+        <MobileBottomNav
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          language={language}
+        />
 
       </div>
     </AuthProvider>

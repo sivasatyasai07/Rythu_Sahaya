@@ -321,19 +321,19 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
       
       {/* Selector Control Panel */}
-      <div className="glass-panel" style={{ padding: '1.25rem 1.5rem', display: 'flex', gap: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+      <div className="glass-panel responsive-card-pad" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 700 }}>
           <Filter size={18} />
           <span>Official Data Filters:</span>
         </div>
 
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', flex: 1 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', width: '100%' }}>
           {/* Select Commodity */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>Crop / Commodity</label>
             <select
               className="form-select"
-              style={{ minWidth: '200px' }}
+              style={{ width: '100%' }}
               value={selectedCommodity}
               onChange={(e) => handleCommodityChange(e.target.value)}
               disabled={loading || commodities.length === 0}
@@ -347,11 +347,11 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
           </div>
 
           {/* Primary Market */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#059669' }}>Primary Market</label>
             <select
               className="form-select"
-              style={{ minWidth: '240px', borderColor: '#10b981' }}
+              style={{ width: '100%', borderColor: '#10b981' }}
               value={primaryMarket}
               onChange={(e) => handlePrimaryMarketChange(e.target.value)}
               disabled={loading || markets.length === 0}
@@ -369,11 +369,11 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
           </div>
 
           {/* Compare Market */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#2563eb' }}>Compare Market (Optional)</label>
             <select
               className="form-select"
-              style={{ minWidth: '240px', borderColor: '#3b82f6' }}
+              style={{ width: '100%', borderColor: '#3b82f6' }}
               value={compareMarket}
               onChange={(e) => handleCompareMarketChange(e.target.value)}
               disabled={loading || markets.length < 2}
@@ -451,21 +451,21 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
       )}
 
       {/* Historical 30-Day Trends Chart */}
-      <div className="glass-panel" style={{ padding: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
+      <div className="glass-panel responsive-card-pad">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.85rem', marginBottom: '1.25rem' }}>
           <div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
               <TrendingUp size={20} color="var(--primary)" />
               {language === 'te' ? '30 రోజుల మార్కెట్ ధరల ట్రెండ్స్' : 'Historical Price Trends'}
             </h3>
-            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
+            <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
               Showing official observed mandi prices from the last 30 days.
             </div>
           </div>
 
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
             {p1Latest && (
-              <span className={`badge ${getSourceBadgeClass(p1Latest.price_source)}`} style={{ fontSize: '0.75rem' }}>
+              <span className={`badge ${getSourceBadgeClass(p1Latest.price_source)}`} style={{ fontSize: '0.72rem' }}>
                 <Database size={12} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
                 {p1Latest.source_label} (Latest: {p1Latest.date})
               </span>
@@ -474,24 +474,24 @@ export const PriceTrendsTab: React.FC<Props> = ({ language }) => {
         </div>
 
         {primaryTrends.length < 2 ? (
-          <div style={{ height: '240px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1', color: '#64748b', textAlign: 'center', padding: '1.5rem' }}>
-            <Calendar size={32} color="#94a3b8" style={{ marginBottom: '0.5rem' }} />
-            <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>
+          <div style={{ height: '220px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1', color: '#64748b', textAlign: 'center', padding: '1.25rem' }}>
+            <Calendar size={28} color="#94a3b8" style={{ marginBottom: '0.5rem' }} />
+            <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>
               Not enough recent official mandi-price data is available to display a trend.
             </span>
-            <span style={{ fontSize: '0.8rem', marginTop: '0.25rem' }}>
+            <span style={{ fontSize: '0.78rem', marginTop: '0.25rem' }}>
               Only valid observed APMC records from the last 30 days are displayed.
             </span>
           </div>
         ) : (
-          <div style={{ height: '360px', width: '100%' }}>
+          <div className="chart-container-responsive">
             <Line data={lineChartData} options={lineOptions} />
           </div>
         )}
       </div>
 
       {/* Cross Market Comparison Grid & Table */}
-      <div className="glass-panel" style={{ padding: '1.5rem' }}>
+      <div className="glass-panel responsive-card-pad">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
           <div>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>

@@ -77,21 +77,21 @@ export const CropDiseaseTab: React.FC<Props> = ({ language = 'en' }) => {
   };
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '1rem 0', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       
       {/* Top Banner Header */}
       <div
+        className="responsive-card-pad"
         style={{
           background: 'linear-gradient(135deg, #064e3b 0%, #047857 50%, #059669 100%)',
           borderRadius: '16px',
-          padding: '1.75rem 2rem',
           color: '#ffffff',
           boxShadow: '0 10px 25px -5px rgba(6, 78, 59, 0.3)',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
-          gap: '1.25rem',
+          gap: '1rem',
         }}
       >
         <div style={{ maxWidth: '640px' }}>
@@ -99,27 +99,28 @@ export const CropDiseaseTab: React.FC<Props> = ({ language = 'en' }) => {
             <Sparkles size={14} />
             <span>{dI18n.badge}</span>
           </div>
-          <h2 style={{ fontSize: '1.85rem', fontWeight: 800, margin: '0 0 0.4rem 0', color: '#ffffff' }}>
+          <h2 style={{ fontSize: 'clamp(1.25rem, 4vw, 1.85rem)', fontWeight: 800, margin: '0 0 0.35rem 0', color: '#ffffff' }}>
             {dI18n.tabTitle}
           </h2>
-          <p style={{ fontSize: '0.92rem', opacity: 0.9, margin: 0, lineHeight: 1.45 }}>
+          <p style={{ fontSize: '0.85rem', opacity: 0.9, margin: 0, lineHeight: 1.45 }}>
             {dI18n.tabSubtitle}
           </p>
         </div>
 
         {/* Sub-Tab Navigation Toggle */}
-        <div style={{ display: 'flex', background: 'rgba(0, 0, 0, 0.2)', padding: '0.35rem', borderRadius: '12px', gap: '0.35rem' }}>
+        <div style={{ display: 'flex', background: 'rgba(0, 0, 0, 0.2)', padding: '0.3rem', borderRadius: '12px', gap: '0.3rem', width: 'auto', flexWrap: 'wrap' }}>
           <button
             type="button"
             onClick={() => setActiveSubTab('detect')}
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.45rem',
-              padding: '0.6rem 1.25rem',
+              justifyContent: 'center',
+              gap: '0.4rem',
+              padding: '0.55rem 1.15rem',
               borderRadius: '8px',
               border: 'none',
-              fontSize: '0.88rem',
+              fontSize: '0.85rem',
               fontWeight: 700,
               cursor: 'pointer',
               background: activeSubTab === 'detect' ? '#ffffff' : 'transparent',
@@ -144,11 +145,12 @@ export const CropDiseaseTab: React.FC<Props> = ({ language = 'en' }) => {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.45rem',
-              padding: '0.6rem 1.25rem',
+              justifyContent: 'center',
+              gap: '0.4rem',
+              padding: '0.55rem 1.15rem',
               borderRadius: '8px',
               border: 'none',
-              fontSize: '0.88rem',
+              fontSize: '0.85rem',
               fontWeight: 700,
               cursor: 'pointer',
               background: activeSubTab === 'history' ? '#ffffff' : 'transparent',
@@ -178,20 +180,20 @@ export const CropDiseaseTab: React.FC<Props> = ({ language = 'en' }) => {
 
       {/* Main Tab Content */}
       {activeSubTab === 'detect' ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           
           {/* Analysis View State: Input Form vs Result Display */}
           {!analysisResponse?.result ? (
             <div
+              className="responsive-card-pad"
               style={{
                 background: '#ffffff',
                 borderRadius: '16px',
                 border: '1px solid #e2e8f0',
-                padding: '2rem',
                 boxShadow: '0 4px 15px rgba(0,0,0,0.04)',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '1.5rem',
+                gap: '1.25rem',
               }}
             >
               <div>

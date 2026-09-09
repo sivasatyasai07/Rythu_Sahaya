@@ -153,39 +153,41 @@ export const PredictionHistoryModal: React.FC<PredictionHistoryModalProps> = ({ 
       >
         {/* Header */}
         <div
+          className="responsive-card-pad"
           style={{
-            padding: '1.25rem 1.75rem',
             borderBottom: '1px solid #e2e8f0',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             background: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)',
             color: '#ffffff',
+            gap: '0.75rem',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
             <div
               style={{
-                width: 36,
-                height: 36,
+                width: 34,
+                height: 34,
                 borderRadius: '8px',
                 backgroundColor: 'rgba(255, 255, 255, 0.2)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                flexShrink: 0,
               }}
             >
-              <TrendingUp size={20} />
+              <TrendingUp size={18} />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800 }}>My Prediction History</h3>
-              <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.85 }}>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>My Prediction History</h3>
+              <p style={{ margin: 0, fontSize: '0.76rem', opacity: 0.85 }}>
                 Saved APMC forecasts & price trend estimates
               </p>
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
             <button
               type="button"
               onClick={loadHistory}
@@ -194,16 +196,16 @@ export const PredictionHistoryModal: React.FC<PredictionHistoryModalProps> = ({ 
                 border: 'none',
                 color: '#ffffff',
                 borderRadius: '8px',
-                padding: '0.4rem 0.65rem',
+                padding: '0.35rem 0.6rem',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.35rem',
-                fontSize: '0.8rem',
+                gap: '0.3rem',
+                fontSize: '0.78rem',
                 fontWeight: 700,
               }}
             >
-              <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+              <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
               <span>Refresh</span>
             </button>
             <button
@@ -219,7 +221,7 @@ export const PredictionHistoryModal: React.FC<PredictionHistoryModalProps> = ({ 
               }}
               aria-label="Close dialog"
             >
-              <X size={22} />
+              <X size={20} />
             </button>
           </div>
         </div>
@@ -227,17 +229,17 @@ export const PredictionHistoryModal: React.FC<PredictionHistoryModalProps> = ({ 
         {/* Filter Bar */}
         {crops.length > 1 && (
           <div
+            className="horizontal-scroll-chips"
             style={{
-              padding: '0.65rem 1.75rem',
+              padding: '0.55rem 1rem',
               backgroundColor: '#f8fafc',
               borderBottom: '1px solid #e2e8f0',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
-              overflowX: 'auto',
+              gap: '0.4rem',
             }}
           >
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748b' }}>Filter Crop:</span>
+            <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#64748b', flexShrink: 0 }}>Filter Crop:</span>
             <button
               type="button"
               onClick={() => setFilterCrop('all')}
@@ -245,11 +247,13 @@ export const PredictionHistoryModal: React.FC<PredictionHistoryModalProps> = ({ 
                 padding: '0.25rem 0.65rem',
                 borderRadius: '50px',
                 border: 'none',
-                fontSize: '0.78rem',
+                fontSize: '0.76rem',
                 fontWeight: 700,
                 cursor: 'pointer',
                 background: filterCrop === 'all' ? '#2563eb' : '#e2e8f0',
                 color: filterCrop === 'all' ? '#ffffff' : '#475569',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
               }}
             >
               All ({history.length})
@@ -263,11 +267,13 @@ export const PredictionHistoryModal: React.FC<PredictionHistoryModalProps> = ({ 
                   padding: '0.25rem 0.65rem',
                   borderRadius: '50px',
                   border: 'none',
-                  fontSize: '0.78rem',
+                  fontSize: '0.76rem',
                   fontWeight: 700,
                   cursor: 'pointer',
                   background: filterCrop === crop ? '#2563eb' : '#e2e8f0',
                   color: filterCrop === crop ? '#ffffff' : '#475569',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
                 }}
               >
                 {crop}
@@ -277,7 +283,7 @@ export const PredictionHistoryModal: React.FC<PredictionHistoryModalProps> = ({ 
         )}
 
         {/* Content Body */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem 1.75rem' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
           {error && (
             <div
               style={{

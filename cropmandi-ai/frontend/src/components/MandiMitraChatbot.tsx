@@ -172,43 +172,33 @@ Question: "${text}"`
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
+          className="chatbot-floating-trigger"
           style={{
             position: 'fixed',
-            bottom: '1.75rem',
-            right: '1.75rem',
-            width: '60px',
-            height: '60px',
+            zIndex: 9990,
             borderRadius: '50%',
             background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
             color: '#ffffff',
             border: '2px solid #ffffff',
-            boxShadow: '0 8px 24px rgba(27, 67, 50, 0.3)',
+            boxShadow: '0 8px 24px rgba(27, 67, 50, 0.35)',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: 9999,
             transition: 'transform 0.2s ease',
           }}
           title="Rythu Sahaya AI"
+          aria-label="Open Rythu Sahaya AI Chat"
         >
-          <img src="/logo.png" alt="Rythu Sahaya Logo" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
+          <img src="/logo.png" alt="Rythu Sahaya Logo" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
         </button>
       )}
 
-      {/* Chatbot Popup Modal */}
+      {/* Chatbot Popup Modal / Mobile Sheet */}
       {isOpen && (
         <div
-          className="glass-panel"
+          className="chatbot-modal-container glass-panel mobile-sheet-animate"
           style={{
-            position: 'fixed',
-            bottom: '1.75rem',
-            right: '1.75rem',
-            width: '380px',
-            maxWidth: 'calc(100vw - 2rem)',
-            height: '540px',
-            maxHeight: 'calc(100vh - 4rem)',
-            borderRadius: 'var(--radius-lg)',
             display: 'flex',
             flexDirection: 'column',
             zIndex: 99999,
@@ -219,69 +209,71 @@ Question: "${text}"`
           }}
         >
           {/* Header */}
-          <div style={{ background: 'linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%)', padding: '1rem 1.25rem', color: '#ffffff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <img src="/logo.png" alt="Rythu Sahaya" style={{ width: '38px', height: '38px', borderRadius: '50%', border: '2px solid #ffffff', objectFit: 'cover' }} />
+          <div style={{ background: 'linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%)', padding: '0.85rem 1.15rem', color: '#ffffff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              <img src="/logo.png" alt="Rythu Sahaya" style={{ width: '34px', height: '34px', borderRadius: '50%', border: '2px solid #ffffff', objectFit: 'cover' }} />
               <div>
-                <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff', margin: 0 }}>Rythu Sahaya AI</h4>
-                <span style={{ fontSize: '0.72rem', opacity: 0.9, display: 'block' }}>Better Market. Best Price. Save Time.</span>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#ffffff', margin: 0 }}>Rythu Sahaya AI</h4>
+                <span style={{ fontSize: '0.7rem', opacity: 0.9, display: 'block' }}>Better Market. Best Price. Save Time.</span>
               </div>
             </div>
 
             <button
               onClick={() => setIsOpen(false)}
-              style={{ background: 'transparent', border: 'none', color: '#ffffff', cursor: 'pointer', opacity: 0.8 }}
+              style={{ background: 'transparent', border: 'none', color: '#ffffff', cursor: 'pointer', opacity: 0.9, padding: '0.3rem' }}
+              aria-label="Close Chatbot"
             >
-              <X size={20} />
+              <X size={22} />
             </button>
           </div>
 
           {/* Messages Body */}
-          <div style={{ flex: 1, padding: '1rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.85rem', background: '#fcfaf6' }}>
+          <div style={{ flex: 1, padding: '0.85rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem', background: '#fcfaf6', WebkitOverflowScrolling: 'touch' }}>
             {messages.map((msg) => (
               <div
                 key={msg.id}
                 style={{
                   display: 'flex',
                   justifyContent: msg.sender === 'user' ? 'flex-end' : 'flex-start',
-                  gap: '0.5rem',
+                  gap: '0.45rem',
                 }}
               >
                 {msg.sender === 'bot' && (
-                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--primary-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Bot size={16} color="var(--primary-dark)" />
+                  <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'var(--primary-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px' }}>
+                    <Bot size={15} color="var(--primary-dark)" />
                   </div>
                 )}
 
                 <div
                   style={{
-                    maxWidth: '80%',
-                    padding: '0.75rem 0.95rem',
-                    borderRadius: msg.sender === 'user' ? '16px 16px 2px 16px' : '16px 16px 16px 2px',
+                    maxWidth: '85%',
+                    padding: '0.65rem 0.85rem',
+                    borderRadius: msg.sender === 'user' ? '14px 14px 2px 14px' : '14px 14px 14px 2px',
                     background: msg.sender === 'user' ? 'var(--primary)' : '#ffffff',
                     color: msg.sender === 'user' ? '#ffffff' : 'var(--text-main)',
-                    fontSize: '0.88rem',
+                    fontSize: '0.86rem',
                     lineHeight: 1.45,
                     boxShadow: 'var(--shadow-sm)',
                     border: msg.sender === 'bot' ? '1px solid var(--border-color)' : 'none',
+                    wordBreak: 'break-word',
                   }}
                 >
                   <div>{msg.text}</div>
-                  <div style={{ fontSize: '0.68rem', marginTop: '0.25rem', opacity: 0.7, textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.65rem', marginTop: '0.2rem', opacity: 0.7, textAlign: 'right' }}>
                     {msg.timestamp}
                   </div>
                 </div>
 
                 {msg.sender === 'user' && (
-                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--accent-gold-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <User size={16} color="#92400e" />
+                  <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'var(--accent-gold-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px' }}>
+                    <User size={15} color="#92400e" />
                   </div>
                 )}
               </div>
             ))}
 
             {loading && (
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', color: 'var(--text-muted)', fontSize: '0.8rem', padding: '0.25rem' }}>
                 <RefreshCw size={14} className="spin" />
                 <span>Thinking...</span>
               </div>
@@ -291,21 +283,22 @@ Question: "${text}"`
           </div>
 
           {/* Quick Prompts */}
-          <div style={{ padding: '0.5rem 0.75rem', background: '#ffffff', borderTop: '1px solid var(--border-color)', display: 'flex', gap: '0.4rem', overflowX: 'auto', scrollbarWidth: 'none' }}>
+          <div style={{ padding: '0.45rem 0.65rem', background: '#ffffff', borderTop: '1px solid var(--border-color)', display: 'flex', gap: '0.35rem', overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
             {t.quickPrompts.map((prompt, idx) => (
               <button
                 key={idx}
                 onClick={() => handleSendMessage(prompt)}
                 style={{
-                  fontSize: '0.75rem',
-                  padding: '0.3rem 0.65rem',
+                  fontSize: '0.72rem',
+                  padding: '0.3rem 0.6rem',
                   borderRadius: '50px',
                   border: '1px solid var(--border-color-strong)',
                   background: 'var(--bg-primary)',
                   color: 'var(--primary-dark)',
                   whiteSpace: 'nowrap',
                   cursor: 'pointer',
-                  fontWeight: 500,
+                  fontWeight: 600,
+                  flexShrink: 0,
                 }}
               >
                 {prompt}
@@ -316,17 +309,17 @@ Question: "${text}"`
           {/* Input Bar */}
           <form
             onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }}
-            style={{ padding: '0.75rem', background: '#ffffff', borderTop: '1px solid var(--border-color)', display: 'flex', gap: '0.5rem' }}
+            style={{ padding: '0.65rem 0.75rem', background: '#ffffff', borderTop: '1px solid var(--border-color)', display: 'flex', gap: '0.5rem', alignItems: 'center' }}
           >
             <input
               type="text"
               className="form-input"
-              style={{ fontSize: '0.88rem', padding: '0.6rem 0.85rem' }}
+              style={{ fontSize: '0.86rem', padding: '0.6rem 0.85rem', borderRadius: '8px' }}
               placeholder={t.placeholder}
               value={inputMsg}
               onChange={(e) => setInputMsg(e.target.value)}
             />
-            <button type="submit" className="btn-primary" style={{ padding: '0.6rem 1rem' }} disabled={loading}>
+            <button type="submit" className="btn-primary" style={{ padding: '0.6rem 0.95rem', minHeight: '40px', flexShrink: 0 }} disabled={loading} aria-label="Send Message">
               <Send size={16} />
             </button>
           </form>

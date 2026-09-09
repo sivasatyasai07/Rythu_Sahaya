@@ -51,6 +51,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       onClick={onClose}
     >
       <div
+        className="responsive-card-pad"
         style={{
           backgroundColor: '#ffffff',
           borderRadius: '16px',
@@ -60,7 +61,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           maxHeight: '90vh',
           overflowY: 'auto',
           position: 'relative',
-          padding: '2rem',
           animation: 'fadeInScale 0.25s ease-out',
         }}
         onClick={(e) => e.stopPropagation()}

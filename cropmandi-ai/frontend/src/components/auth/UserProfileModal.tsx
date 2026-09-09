@@ -88,6 +88,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
       onClick={onClose}
     >
       <div
+        className="responsive-card-pad"
         style={{
           backgroundColor: '#ffffff',
           borderRadius: '16px',
@@ -97,7 +98,6 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
           maxHeight: '90vh',
           overflowY: 'auto',
           position: 'relative',
-          padding: '2rem',
         }}
         onClick={(e) => e.stopPropagation()}
       >

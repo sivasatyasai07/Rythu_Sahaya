@@ -164,25 +164,25 @@ export const ForecastResult: React.FC<ForecastResultProps> = ({ data, language =
 
       {/* 2. Hero Card: Clean Current Price View */}
       <div
+        className="responsive-card-pad"
         style={{
           background: '#ffffff',
           borderRadius: '16px',
           border: '1px solid #e2e8f0',
-          padding: '1.25rem 1.75rem',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
-          gap: '1.25rem',
+          gap: '1rem',
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
         }}
       >
         {/* Left: Verification Icon + Latest Observed Price */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.15rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
           <div
             style={{
-              width: '48px',
-              height: '48px',
+              width: '44px',
+              height: '44px',
               borderRadius: '50%',
               background: showSimpleTodayView ? '#dcfce7' : '#e0f2fe',
               display: 'flex',
@@ -192,29 +192,29 @@ export const ForecastResult: React.FC<ForecastResultProps> = ({ data, language =
             }}
           >
             {showSimpleTodayView ? (
-              <Check size={26} color="#16a34a" strokeWidth={2.8} />
+              <Check size={24} color="#16a34a" strokeWidth={2.8} />
             ) : (
-              <ShieldCheck size={26} color="#0284c7" strokeWidth={2.2} />
+              <ShieldCheck size={24} color="#0284c7" strokeWidth={2.2} />
             )}
           </div>
 
           <div>
-            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.3px', display: 'flex', alignItems: 'center', gap: '0.55rem', flexWrap: 'wrap' }}>
+            <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.3px', display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
               <span>
                 {showSimpleTodayView
                   ? `${t('forecast.currentPriceCardTitle', {}, language)} (${observationDateStr})`
                   : `${t('forecast.latestObserved', {}, language)} (${observationDateStr})`
                 }
               </span>
-              <span style={{ background: '#f1f5f9', color: '#1e293b', border: '1px solid #cbd5e1', padding: '0.12rem 0.6rem', borderRadius: '6px', fontSize: '0.74rem', fontWeight: 700, textTransform: 'none' }}>
+              <span style={{ background: '#f1f5f9', color: '#1e293b', border: '1px solid #cbd5e1', padding: '0.12rem 0.5rem', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 700, textTransform: 'none' }}>
                 📍 {getLocalizedMarketName(data.market, language)} • {getLocalizedDistrictName(data.district && data.district !== 'Andhra Pradesh' ? data.district : getDistrictForMarket(data.market), language)}
               </span>
             </div>
-            <div style={{ fontSize: '2.1rem', fontWeight: 800, color: '#000000', lineHeight: 1.15, marginTop: '0.2rem' }}>
+            <div className="responsive-hero-price" style={{ fontWeight: 800, color: '#000000', lineHeight: 1.15, marginTop: '0.2rem' }}>
               {basePrice !== null && basePrice > 0 ? (
                 <>
                   ₹{basePrice.toFixed(2)}
-                  <span style={{ fontSize: '1.05rem', fontWeight: 500, color: '#64748b', marginLeft: '0.35rem' }}>
+                  <span style={{ fontSize: '0.95rem', fontWeight: 500, color: '#64748b', marginLeft: '0.35rem' }}>
                     {t('common.unitQuintal', {}, language)}
                   </span>
                 </>
@@ -230,19 +230,19 @@ export const ForecastResult: React.FC<ForecastResultProps> = ({ data, language =
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.85rem',
+            gap: '0.75rem',
             background: '#f1f5f9',
             border: '1px solid #e2e8f0',
-            padding: '0.75rem 1.4rem',
+            padding: '0.65rem 1.15rem',
             borderRadius: '12px',
           }}
         >
-          <TrendIcon size={24} color={trendColor} strokeWidth={2.5} />
+          <TrendIcon size={22} color={trendColor} strokeWidth={2.5} />
           <div>
-            <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+            <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
               {showSimpleTodayView ? t('forecast.currentOneDayTrend', {}, language) : t('forecast.expectedTrend', {}, language)}
             </div>
-            <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
+            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
               {trendLabel}
             </div>
           </div>
@@ -252,11 +252,11 @@ export const ForecastResult: React.FC<ForecastResultProps> = ({ data, language =
       {/* 3. Farmer Decision Advisory Card */}
       {basePrice !== null && basePrice > 0 && (
         <div
+          className="responsive-card-pad"
           style={{
             background: recBg,
             border: `1.5px solid ${recBorder}`,
             borderRadius: '16px',
-            padding: '1.25rem 1.75rem',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',

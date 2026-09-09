@@ -34,13 +34,13 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="navbar-container">
         
         {/* Brand Logo & Title */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0 }}>
           <img
             src="/logo.png"
             alt="Rythu Sahaya Logo"
             style={{
-              width: '48px',
-              height: '48px',
+              width: '42px',
+              height: '42px',
               borderRadius: '50%',
               objectFit: 'cover',
               border: '2px solid var(--primary)',
@@ -48,12 +48,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               flexShrink: 0,
             }}
           />
-          <div>
-            <h1 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--primary-dark)', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-              <span>{t.appTitle}</span>
-              <span className="badge badge-green" style={{ fontSize: '0.7rem' }}>APMC AI</span>
+          <div style={{ minWidth: 0 }}>
+            <h1 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--primary-dark)', display: 'flex', alignItems: 'center', gap: '0.35rem', margin: 0, lineHeight: 1.2 }}>
+              <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.appTitle}</span>
+              <span className="badge badge-green desktop-only" style={{ fontSize: '0.68rem', padding: '0.15rem 0.5rem' }}>APMC AI</span>
             </h1>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {t.appSubtitle}
             </div>
           </div>
@@ -62,8 +62,8 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Right Navigation & 5-Language Selector */}
         <div className="navbar-right">
           
-          {/* Navigation Tabs */}
-          <nav className="navbar-nav">
+          {/* Desktop Navigation Tabs (Hidden on Mobile) */}
+          <nav className="navbar-nav desktop-only">
             {[
               { id: 'forecast', label: t.tabs.forecast, icon: TrendingUp },
               { id: 'trends', label: t.tabs.trends, icon: Sprout },
@@ -90,6 +90,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     fontSize: '0.88rem',
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   <Icon size={16} color={isActive ? '#ffffff' : 'var(--primary)'} />
@@ -100,8 +101,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           </nav>
 
           {/* 5-Language Selector */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'var(--accent-gold-light)', padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(217,119,6,0.3)' }}>
-            <Globe size={16} color="#92400e" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: 'var(--accent-gold-light)', padding: '0.35rem 0.55rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(217,119,6,0.3)', flexShrink: 0 }}>
+            <Globe size={15} color="#92400e" />
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value as Language)}
@@ -110,16 +111,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                 border: 'none',
                 color: '#92400e',
                 fontWeight: 700,
-                fontSize: '0.85rem',
+                fontSize: '0.82rem',
                 cursor: 'pointer',
                 outline: 'none',
+                paddingRight: '0.2rem',
               }}
+              aria-label="Select Language"
             >
               <option value="en">English</option>
-              <option value="te">తెలుగు (Telugu)</option>
-              <option value="hi">हिंदी (Hindi)</option>
-              <option value="ml">മലയാളം (Malayalam)</option>
-              <option value="ta">தமிழ் (Tamil)</option>
+              <option value="te">తెలుగు</option>
+              <option value="hi">हिंदी</option>
+              <option value="ml">മലയാളം</option>
+              <option value="ta">தமிழ்</option>
             </select>
           </div>
 

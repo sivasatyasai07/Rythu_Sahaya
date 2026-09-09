@@ -182,25 +182,26 @@ const FALLBACK_APMC_MARKETS: Market[] = [
   const selectedMandi = markets.find((m) => m.id === selectedMarketId);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       
       {/* Top Controls & Geolocation Button */}
-      <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.25rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+      <div className="glass-panel responsive-card-pad" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <CloudSun size={28} color="var(--primary)" />
           <div>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{t.title}</h3>
-            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0 }}>{t.title}</h3>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
               {t.subtitle}
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap', width: '100%', maxWidth: '500px' }}>
           <button
             onClick={detectUserLocationAndFetchWeather}
             className="btn-secondary"
             disabled={locationLoading}
+            style={{ flex: 1, minWidth: '150px' }}
           >
             <Navigation size={16} className={locationLoading ? 'spin' : ''} color="var(--primary)" />
             <span>{locationLoading ? t.detectingLocation : locT.detectLocationBtn}</span>
@@ -208,7 +209,7 @@ const FALLBACK_APMC_MARKETS: Market[] = [
 
           <select
             className="form-select"
-            style={{ maxWidth: '320px' }}
+            style={{ flex: 1, minWidth: '180px' }}
             value={selectedMarketId}
             onChange={(e) => {
               const mId = Number(e.target.value);
@@ -227,39 +228,39 @@ const FALLBACK_APMC_MARKETS: Market[] = [
 
       {/* 1. USER CURRENT LOCATION WEATHER BANNER */}
       {userWeather && (
-        <div className="glass-panel" style={{ padding: '1.75rem', background: 'linear-gradient(135deg, #ffffff 0%, #fef3c7 100%)', borderLeft: '6px solid var(--accent-gold)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
+        <div className="glass-panel responsive-card-pad" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #fef3c7 100%)', borderLeft: '6px solid var(--accent-gold)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.85rem', marginBottom: '1.15rem' }}>
             <div>
-              <span className="badge badge-gold" style={{ marginBottom: '0.4rem' }}>
+              <span className="badge badge-gold" style={{ marginBottom: '0.35rem' }}>
                 <MapPin size={14} />
                 {locT.locationDetected}
               </span>
-              <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#78350f' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#78350f', margin: 0 }}>
                 {userWeather.city}, {userWeather.state} ({userWeather.latitude.toFixed(2)}°N, {userWeather.longitude.toFixed(2)}°E)
               </h3>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <CloudSun size={38} color="#d97706" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <CloudSun size={34} color="#d97706" />
                 <div>
-                  <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#78350f' }}>{userWeather.temp}°C</div>
-                  <div style={{ fontSize: '0.8rem', color: '#92400e', fontWeight: 600 }}>{t.liveWeather}</div>
+                  <div style={{ fontSize: '1.65rem', fontWeight: 800, color: '#78350f' }}>{userWeather.temp}°C</div>
+                  <div style={{ fontSize: '0.78rem', color: '#92400e', fontWeight: 600 }}>{t.liveWeather}</div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* User Location 5-Day Mini Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.85rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem' }}>
             {userWeather.dailyForecast.slice(0, 5).map((d) => (
-              <div key={d.date} style={{ background: 'rgba(255,255,255,0.85)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(217,119,6,0.2)', textAlign: 'center' }}>
-                <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#78350f' }}>{d.date}</div>
-                <div style={{ margin: '0.4rem 0' }}>
-                  {d.rainSum > 0 ? <CloudRain size={22} color="#2563eb" /> : <CloudSun size={22} color="#d97706" />}
+              <div key={d.date} style={{ background: 'rgba(255,255,255,0.85)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(217,119,6,0.2)', textAlign: 'center' }}>
+                <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#78350f' }}>{d.date}</div>
+                <div style={{ margin: '0.35rem 0' }}>
+                  {d.rainSum > 0 ? <CloudRain size={20} color="#2563eb" /> : <CloudSun size={20} color="#d97706" />}
                 </div>
-                <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#78350f' }}>{d.maxTemp}° / {d.minTemp}°C</div>
-                <div style={{ fontSize: '0.72rem', color: '#92400e', marginTop: '0.2rem' }}>
+                <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#78350f' }}>{d.maxTemp}° / {d.minTemp}°C</div>
+                <div style={{ fontSize: '0.7rem', color: '#92400e', marginTop: '0.15rem' }}>
                   🌧️ {d.rainSum} mm | 💨 {d.windMax} km/h
                 </div>
               </div>
@@ -269,7 +270,7 @@ const FALLBACK_APMC_MARKETS: Market[] = [
       )}
 
       {/* 2. SELECTED AP MANDI WEATHER FORECAST */}
-      <div className="glass-panel" style={{ padding: '1.5rem' }}>
+      <div className="glass-panel responsive-card-pad">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
           <div>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>

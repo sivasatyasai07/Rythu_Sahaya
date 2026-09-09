@@ -177,11 +177,10 @@ h1, h2, h3, h4 {
 .navbar-container {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0.85rem 1.25rem;
+  padding: 0.75rem 1.25rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
   gap: 0.85rem;
   width: 100%;
 }
@@ -201,32 +200,206 @@ h1, h2, h3, h4 {
 .navbar-right {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
   gap: 0.75rem;
 }
 
-@media (max-width: 1100px) {
-  .navbar-container {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .navbar-right {
-    justify-content: space-between;
-    width: 100%;
-  }
-  .forecast-control-grid {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+/* Visibility Utilities */
+.desktop-only {
+  display: flex !important;
+}
+
+.mobile-only {
+  display: none !important;
+}
+
+/* Responsive Card Padding & Typography Utilities */
+.responsive-card-pad {
+  padding: 1.25rem 1.75rem;
+}
+
+.responsive-hero-price {
+  font-size: clamp(1.65rem, 5.5vw, 2.2rem);
+}
+
+@media (max-width: 768px) {
+  .responsive-card-pad {
+    padding: 1rem !important;
   }
 }
 
-@media (max-width: 640px) {
-  .forecast-control-grid {
-    grid-template-columns: 1fr;
+/* Mobile Bottom Navigation Bar */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(62px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border-color);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+  z-index: 999;
+  justify-content: space-around;
+  align-items: center;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+.mobile-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: transparent;
+  border: none;
+  padding: 6px 2px;
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-nav-item.active {
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.mobile-nav-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 28px;
+  border-radius: 14px;
+  transition: all 0.2s ease;
+}
+
+.mobile-nav-item.active .mobile-nav-icon-wrap {
+  background: var(--primary-subtle);
+}
+
+/* Touch-optimized horizontal scrolling chip lists */
+.horizontal-scroll-chips {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.25rem 0;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.horizontal-scroll-chips::-webkit-scrollbar {
+  display: none;
+}
+
+/* Slide Up Modal Animations for Mobile */
+@keyframes slideUpMobile {
+  from {
+    transform: translateY(100%);
+    opacity: 0.5;
   }
-  .navbar-nav {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.25rem;
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.mobile-sheet-animate {
+  animation: slideUpMobile 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Chart Container Wrapper */
+.chart-container-responsive {
+  position: relative;
+  width: 100%;
+  height: 380px;
+}
+
+/* Chatbot Responsive Floating Trigger and Modal */
+.chatbot-floating-trigger {
+  bottom: 2rem;
+  right: 2rem;
+  width: 58px;
+  height: 58px;
+}
+
+.chatbot-modal-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 380px;
+  max-width: calc(100vw - 2rem);
+  height: 540px;
+  max-height: calc(100vh - 4rem);
+  border-radius: var(--radius-lg);
+}
+
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+  .mobile-only {
+    display: flex !important;
+  }
+  .mobile-bottom-nav {
+    display: flex;
+  }
+  .chart-container-responsive {
+    height: 280px;
+  }
+  
+  .chatbot-floating-trigger {
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    right: 1rem;
+    width: 52px;
+    height: 52px;
+  }
+
+  .chatbot-modal-container {
+    bottom: calc(62px + env(safe-area-inset-bottom, 0px));
+    right: 0;
+    left: 0;
+    width: 100%;
+    max-width: 100vw;
+    height: calc(100dvh - 66px - env(safe-area-inset-bottom, 0px));
+    max-height: calc(100dvh - 66px - env(safe-area-inset-bottom, 0px));
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    border-bottom: none;
+  }
+  
+  /* Make main content push above mobile bottom bar */
+  main {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    padding-top: 1rem !important;
+  }
+
+  .navbar-container {
+    padding: 0.6rem 0.85rem;
+  }
+
+  .glass-panel, .agricultural-card {
+    border-radius: var(--radius-sm);
+  }
+  
+  .btn-primary, .btn-secondary {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-container-responsive {
+    height: 250px;
   }
 }
 

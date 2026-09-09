@@ -142,12 +142,12 @@ export const FarmerForecastTab: React.FC<Props> = ({ language }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
-      {/* Top Banner (Screenshot 1: Official APMC & Real-time Synchronization) */}
+      {/* Top Banner (Official APMC & Real-time Synchronization) */}
       <div
+        className="responsive-card-pad"
         style={{
           background: '#ffffff',
           borderRadius: '16px',
-          padding: '1.25rem 1.75rem',
           border: '1px solid #e2e8f0',
           display: 'flex',
           justifyContent: 'space-between',
@@ -157,11 +157,11 @@ export const FarmerForecastTab: React.FC<Props> = ({ language }) => {
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
           <div
             style={{
-              width: '44px',
-              height: '44px',
+              width: '40px',
+              height: '40px',
               borderRadius: '50%',
               background: '#dcfce7',
               display: 'flex',
@@ -173,14 +173,14 @@ export const FarmerForecastTab: React.FC<Props> = ({ language }) => {
             <CheckCircle2 size={22} color="#16a34a" />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', margin: 0, lineHeight: 1.25 }}>
+            <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: 0, lineHeight: 1.25 }}>
               {language === 'te'
                 ? 'ఆంధ్రప్రదేశ్ APMC మండి ధరల అంచనా'
                 : (language === 'hi'
                     ? 'आंध्र प्रदेश एपीएमसी मंडी मूल्य पूर्वानुमान'
                     : 'Andhra Pradesh APMC Mandi Price Forecast')}
             </h2>
-            <p style={{ fontSize: '0.82rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>
+            <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>
               {language === 'te'
                 ? 'తాజా అధికారిక మార్కెట్ ధరలు మరియు AI ఆధారిత 3 రోజుల అంచనా'
                 : (language === 'hi'
@@ -190,7 +190,7 @@ export const FarmerForecastTab: React.FC<Props> = ({ language }) => {
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
           <button
             type="button"
             onClick={() => {
@@ -204,7 +204,7 @@ export const FarmerForecastTab: React.FC<Props> = ({ language }) => {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.4rem',
-              padding: '0.4rem 0.85rem',
+              padding: '0.45rem 0.85rem',
               borderRadius: '8px',
               border: '1px solid #cbd5e1',
               backgroundColor: '#ffffff',
@@ -224,9 +224,9 @@ export const FarmerForecastTab: React.FC<Props> = ({ language }) => {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.35rem',
-              padding: '0.35rem 0.75rem',
+              padding: '0.35rem 0.65rem',
               borderRadius: '50px',
-              fontSize: '0.75rem',
+              fontSize: '0.74rem',
               fontWeight: 700,
               background: '#f0fdf4',
               color: '#166534',
@@ -239,12 +239,12 @@ export const FarmerForecastTab: React.FC<Props> = ({ language }) => {
         </div>
       </div>
 
-      {/* Main Single-Row Control Card (Exact layout matching Screenshot 1) */}
+      {/* Main Single-Row Control Card */}
       <div
+        className="responsive-card-pad"
         style={{
           background: '#ffffff',
           borderRadius: '16px',
-          padding: '1.5rem 1.75rem',
           border: '1px solid #e2e8f0',
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
         }}

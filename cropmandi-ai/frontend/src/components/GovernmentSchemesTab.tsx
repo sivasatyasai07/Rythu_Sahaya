@@ -268,50 +268,50 @@ export const GovernmentSchemesTab: React.FC<Props> = ({ language }) => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       
       {/* Header Banner */}
-      <div className="glass-panel" style={{ padding: '2rem', borderRadius: 'var(--radius-lg)', background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(216,243,220,0.4) 100%)', borderLeft: '6px solid var(--primary)' }}>
+      <div className="glass-panel responsive-card-pad" style={{ borderRadius: 'var(--radius-lg)', background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(216,243,220,0.4) 100%)', borderLeft: '6px solid var(--primary)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--primary)', fontWeight: 700, marginBottom: '0.4rem', fontSize: '0.9rem' }}>
-              <Landmark size={20} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 700, marginBottom: '0.35rem', fontSize: '0.85rem' }}>
+              <Landmark size={18} />
               <span>{t.headerTag || 'OFFICIAL WELFARE & FINANCIAL SCHEMES'}</span>
             </div>
-            <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--primary-dark)' }}>
+            <h2 style={{ fontSize: 'clamp(1.25rem, 4vw, 1.75rem)', fontWeight: 800, color: 'var(--primary-dark)', margin: 0 }}>
               {t.title}
             </h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '0.3rem', maxWidth: '800px' }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginTop: '0.3rem', maxWidth: '800px', lineHeight: 1.45 }}>
               {t.subtitle}
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <div className="horizontal-scroll-chips" style={{ display: 'flex', gap: '0.4rem', width: 'auto' }}>
             <button
               onClick={() => setSelectedCategory('all')}
               className={selectedCategory === 'all' ? 'btn-primary' : 'btn-secondary'}
-              style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}
+              style={{ fontSize: '0.82rem', padding: '0.45rem 0.9rem', whiteSpace: 'nowrap', flexShrink: 0 }}
             >
               {t.allSchemes || 'All Schemes'}
             </button>
             <button
               onClick={() => setSelectedCategory('central')}
               className={selectedCategory === 'central' ? 'btn-primary' : 'btn-secondary'}
-              style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}
+              style={{ fontSize: '0.82rem', padding: '0.45rem 0.9rem', whiteSpace: 'nowrap', flexShrink: 0 }}
             >
               {t.centralGovt || 'Central Govt'}
             </button>
             <button
               onClick={() => setSelectedCategory('ap')}
               className={selectedCategory === 'ap' ? 'btn-primary' : 'btn-secondary'}
-              style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}
+              style={{ fontSize: '0.82rem', padding: '0.45rem 0.9rem', whiteSpace: 'nowrap', flexShrink: 0 }}
             >
               {t.andhraPradesh || 'Andhra Pradesh'}
             </button>
             <button
               onClick={() => setSelectedCategory('insurance')}
               className={selectedCategory === 'insurance' ? 'btn-primary' : 'btn-secondary'}
-              style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}
+              style={{ fontSize: '0.82rem', padding: '0.45rem 0.9rem', whiteSpace: 'nowrap', flexShrink: 0 }}
             >
               {t.insurance || 'Crop Insurance'}
             </button>
@@ -320,7 +320,7 @@ export const GovernmentSchemesTab: React.FC<Props> = ({ language }) => {
       </div>
 
       {/* Grid of Schemes */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1.75rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
         {filteredSchemes.map((scheme) => (
           <div
             key={scheme.id}
