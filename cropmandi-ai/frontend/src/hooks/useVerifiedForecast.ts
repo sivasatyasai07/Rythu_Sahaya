@@ -75,7 +75,7 @@ export function useVerifiedForecast(): UseVerifiedForecastReturn {
         stepTimerRef.current = window.setTimeout(() => {
           if (thisRequestId === activeRequestIdRef.current) {
             setStepIndex(3);
-            setLoadingStep('Stage 3 of 5: Checking master-data.csv & building feature vectors...');
+            setLoadingStep('Stage 3 of 5: Checking official mandi archives & building feature vectors...');
             stepTimerRef.current = window.setTimeout(() => {
               if (thisRequestId === activeRequestIdRef.current) {
                 setStepIndex(4);

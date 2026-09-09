@@ -3,7 +3,7 @@ import { api } from '../api';
 import type { WeatherObservation, Market } from '../api';
 import type { Language } from '../i18n/translations';
 import { translations } from '../i18n/translations';
-import { getLocalizedMarketName, getLocalizedDistrictName } from '../utils/i18nData';
+import { getLocalizedMarketName } from '../utils/i18nData';
 import { calculateHaversineDistance, reverseGeocode } from '../utils/location';
 import { CloudSun, CloudRain, AlertTriangle, RefreshCw, MapPin, Navigation, Droplets, Wind, ChevronDown, ChevronUp, Clock } from 'lucide-react';
 
@@ -192,25 +192,43 @@ export const WeatherTab: React.FC<Props> = ({ language }) => {
           </div>
         </div>
 
-        {/* Controls Layout: Compact inline on PC, stacked full-width on Mobile */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.75rem', width: '100%' }}>
+        {/* Controls Layout: Clean side-by-side row on all screens */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
+            gap: '0.5rem',
+            width: '100%',
+            maxWidth: '520px',
+            alignItems: 'center',
+          }}
+        >
           <button
             type="button"
             onClick={detectUserLocationAndFetchWeather}
             className="btn-secondary"
             disabled={locationLoading}
             style={{ 
-              flex: '0 0 auto', 
-              minWidth: '180px',
-              minHeight: '42px',
-              padding: '0.55rem 1rem' 
+              width: '100%',
+              minHeight: '38px',
+              padding: '0.45rem 0.65rem',
+              fontSize: '0.8rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.35rem',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
             }}
           >
-            <Navigation size={16} className={locationLoading ? 'spin' : ''} color="var(--primary)" />
-            <span>{locationLoading ? t.detectingLocation : locT.detectLocationBtn}</span>
+            <Navigation size={14} className={locationLoading ? 'spin' : ''} color="var(--primary)" style={{ flexShrink: 0 }} />
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {locationLoading ? t.detectingLocation : locT.detectLocationBtn}
+            </span>
           </button>
 
-          <div style={{ flex: '1 1 260px', maxWidth: '420px', minWidth: '220px' }}>
+          <div style={{ width: '100%' }}>
             <select
               className="form-select"
               value={selectedMarketId}
@@ -219,12 +237,18 @@ export const WeatherTab: React.FC<Props> = ({ language }) => {
                 setSelectedMarketId(mId);
                 fetchMandiWeather(mId);
               }}
-              style={{ width: '100%', minHeight: '42px' }}
+              style={{
+                width: '100%',
+                minHeight: '38px',
+                padding: '0.45rem 0.65rem',
+                fontSize: '0.82rem',
+                borderRadius: '8px',
+              }}
               aria-label="Select APMC Mandi"
             >
               {markets.map((m) => (
                 <option key={m.id} value={m.id}>
-                  {getLocalizedMarketName(m.canonical_name, language)} ({getLocalizedDistrictName(m.district, language)})
+                  {getLocalizedMarketName(m.canonical_name, language)}
                 </option>
               ))}
             </select>

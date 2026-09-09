@@ -58,11 +58,21 @@ export function App() {
 
         {/* Main Container */}
         <main style={{ flex: 1, maxWidth: '1280px', width: '100%', margin: '0 auto', padding: '1.5rem 1rem', position: 'relative', zIndex: 1 }}>
-          {activeTab === 'forecast' && <FarmerForecastTab language={language} onNavigateTab={setActiveTab} />}
-          {activeTab === 'trends' && <PriceTrendsTab language={language} />}
-          {activeTab === 'disease' && <CropDiseaseTab language={language} />}
-          {activeTab === 'weather' && <WeatherTab language={language} />}
-          {activeTab === 'schemes' && <GovernmentSchemesTab language={language} />}
+          <div style={{ display: activeTab === 'forecast' ? 'block' : 'none', width: '100%' }}>
+            <FarmerForecastTab language={language} onNavigateTab={setActiveTab} />
+          </div>
+          <div style={{ display: activeTab === 'trends' ? 'block' : 'none', width: '100%' }}>
+            <PriceTrendsTab language={language} />
+          </div>
+          <div style={{ display: activeTab === 'disease' ? 'block' : 'none', width: '100%' }}>
+            <CropDiseaseTab language={language} />
+          </div>
+          <div style={{ display: activeTab === 'weather' ? 'block' : 'none', width: '100%' }}>
+            <WeatherTab language={language} />
+          </div>
+          <div style={{ display: activeTab === 'schemes' ? 'block' : 'none', width: '100%' }}>
+            <GovernmentSchemesTab language={language} />
+          </div>
         </main>
 
         {/* Floating Mandi Mitra AI Chatbot */}
