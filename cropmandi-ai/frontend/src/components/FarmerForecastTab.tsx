@@ -144,21 +144,15 @@ export const FarmerForecastTab: React.FC<Props> = ({ language }) => {
       
       {/* Top Banner Header */}
       <div
-        className="responsive-card-pad"
+        className="responsive-card-pad forecast-banner-header"
         style={{
           background: '#ffffff',
           borderRadius: '16px',
           border: '1px solid #e2e8f0',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '0.85rem',
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
-          width: '100%',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0, flex: 1 }}>
+        <div className="forecast-banner-title-wrap">
           <div
             style={{
               width: '38px',
@@ -173,8 +167,8 @@ export const FarmerForecastTab: React.FC<Props> = ({ language }) => {
           >
             <CheckCircle2 size={20} color="#16a34a" />
           </div>
-          <div className="min-w-0" style={{ flex: 1 }}>
-            <h2 style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0f172a', margin: 0, lineHeight: 1.25 }} className="break-words">
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h2 className="forecast-title-text">
               {language === 'te' ? (
                 <>ఆంధ్రప్రదేశ్<br />APMC మండి ధరల అంచనా</>
               ) : language === 'hi' ? (
@@ -190,7 +184,7 @@ export const FarmerForecastTab: React.FC<Props> = ({ language }) => {
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', flexShrink: 0 }}>
+        <div className="forecast-banner-actions">
           <button
             type="button"
             onClick={() => {
@@ -235,7 +229,7 @@ export const FarmerForecastTab: React.FC<Props> = ({ language }) => {
             }}
           >
             <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e' }}></span>
-            {language === 'te' ? 'ప్రత్యక్ష సమకాలీకరణ' : (language === 'hi' ? 'लाइव सिंक' : (language === 'ta' ? 'நேரலை ஒத்திசைவு' : (language === 'ml' ? 'തത്സമയ സമന്വയം' : 'Live Sync')))}
+            {language === 'te' ? 'ప్రత్యక్ష సమకాలీకరణ' : (language === 'hi' ? 'लाइव सिंक' : (language === 'ta' ? 'நேரலை ஒத்திசைவு' : (language === 'ml' ? 'తത്സమయ സമന്വയം' : 'Live Sync')))}
           </span>
         </div>
       </div>
